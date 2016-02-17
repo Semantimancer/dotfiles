@@ -1,0 +1,53 @@
+! Xft settings
+
+Xft.dpi:        96
+Xft.antialias:  true
+Xft.rgba:       rgb
+Xft.hinting:    full
+Xft.hintstyle:  hintslight
+
+URxvt*.urgentOnBell: true
+URxvt*.visualBell: false
+
+URxvt*.scrollBar: false
+!URxvt*.transparent: true
+!URxvt*.shading: 10
+
+URxvt*.font: xft:hack:Regular:size=8
+URxvt*.letterSpace: -1
+
+URxvt*.cursorBlink: true
+URxvt*.cursorUnderline: true
+URxvt*.cursorColor: #ffffaf
+
+!Black
+*.color0:  #000000
+*.color8:  #000000
+
+!Red
+*.color1:  #dfaf87
+*.color9:  #dfaf87
+
+!Green
+*.color2:  #afdf87
+*.color10: #afdf87
+
+!Yellow
+*.color3:  #dfdf87
+*.color11: #dfdf87
+
+!Blue
+*.color4:  #87afdf
+*.color12: #87afdf
+
+!Magenta
+*.color5:  #dfafdf
+*.color13: #dfafdf
+
+!Cyan
+*.color6:  #1787df
+*.color14: #1787df
+
+!Light Grey/White
+*.color7:  #aeaeae
+*.color15: #aeaeae

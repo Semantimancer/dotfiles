@@ -1,0 +1,14 @@
+syntax match Conceal "/=" conceal cchar=≠
+syntax match Conceal "::" conceal cchar=∷
+syntax match Conceal ">>" conceal cchar=»
+syntax match Conceal "<<" conceal cchar=«
+syntax match Conceal "sum" conceal cchar=∑
+syntax match Conceal "sqrt" conceal cchar=√
+syntax match Conceal "->" conceal cchar=→
+syntax match Conceal "<-" conceal cchar=←
+syntax match Conceal "!!" conceal cchar=‼
+syntax match Conceal "&&" conceal cchar=∧
+syntax match Conceal "||" conceal cchar=∨
+syntax match Conceal "`elem`" conceal cchar=∈
+syntax match Conceal "`notElem`" conceal cchar=∉
+syntax match Conceal "()" conceal cchar=∅
