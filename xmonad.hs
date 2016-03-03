@@ -333,6 +333,7 @@ layout = showWName $ mkToggle (single FULL) $ perWS $ smartBorders $ defaultLayo
 
 myManageHook = composeAll
   [ className =? "MPlayer"                            --> doShift "media"
+  , className =? "mpv"                                --> doShift "media"
   , className =? "Gimp"                               --> doShift "gimp"
   , className =? "feh"						                    --> doFloat
   , className =? "Firefox" <&&> resource =? "Dialog"  --> doFloat
@@ -365,6 +366,7 @@ myLogHook = fadeWindowsLogHook fadeHook
                               , isFloating              --> opaque
                               , className =? "Netflix"  --> opaque
                               , className =? "MPlayer"  --> opaque
+                              , className =? "mpv"      --> opaque
                               ]
 
 main :: IO ()
