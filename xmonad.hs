@@ -38,7 +38,7 @@ import qualified Data.Map        as M
 notes = "/home/ben/Notes.txt"
 
 startupCommands = ["skype","dunst","spotify","spotify-notify","compton"
-                  ,"urxvt -rv -T ViM -e vim","redshift"
+                  ,"urxvt -rv -T ViM -e vim","redshift","tint2"
                   ,"xrandr --output VGA-1 --right-of LVDS-1"
                   ]
 
@@ -58,7 +58,7 @@ myTopics :: [Topic]
 myTopics = ["dashboard"                                 --Goto: Backspace
            ,"web","vim","chat","writing","gimp","work"  --Goto: 1-6
            ,"reference","compile","steam","music"       --Goto: 7-0
-           ,"web","movie"                               --No gotos
+           ,"movie","view"                              --No gotos
            ]
 
 myTopicConfig :: TopicConfig
@@ -68,15 +68,18 @@ myTopicConfig = defaultTopicConfig
       ,("writing","/home/ben/Documents")
       ,("compile","/home/ben/Computer")
       ,("music","/home/ben/Music")
-      ,("movie","/home/ben/Videos")]
+      ,("movie","/home/ben/Videos")
+      ,("view","/home/ben/Pictures")]
   , defaultTopicAction = const spawnShell
   , defaultTopic = "dashboard"
   , topicActions = M.fromList $ 
-      [("web",spawn "vivaldi-snapshot")
+      [("dashboard",spawn "urxvt -rv -e ranger")
+      ,("web",spawn "vivaldi-snapshot")
       ,("vim",spawn "urxvt -rv -e vim")
       ,("writing",spawn "libreoffice")
       ,("gimp",spawn "gimp")
       ,("reference",spawn "urxvt -rv -e newsbeuter")
+      ,("steam",spawn "steam.sh")
       ,("music",spawn "spotify")
       ]
   }
@@ -329,6 +332,7 @@ layout = showWName $ mkToggle (single FULL) $ perWS $ smartBorders $ defaultLayo
 
         defaultLayouts = tall ||| Mirror tall
 
+        dash =    onWorkspace "dashboard" $ OneBig (1/2) (1/20)
         chat =    onWorkspace "chat"    $ reflectHoriz Circle
         steam =   onWorkspace "steam"   $ one
         compile = onWorkspace "compile" $ one
@@ -343,8 +347,8 @@ layout = showWName $ mkToggle (single FULL) $ perWS $ smartBorders $ defaultLayo
 
         grid =    onWorkspace "grid"    $ Grid ||| reflectHoriz Circle
 
-        perWS = chat . steam . compile . music . gimp . writing . vim . file 
-              . view . grid
+        perWS = dash . chat . steam . compile . music . gimp . writing . vim 
+              . file . view . grid
 
 --
 --
@@ -365,11 +369,13 @@ myManageHook = composeAll
   , className =? "Steam"                              --> doShift "steam"
   , className =? "Spotify"                            --> doShift "music"
   , className =? "stalonetry"                         --> doSideFloat NC
+  , title =? "tint2"                                  --> doShift "dashboard" >> unfloat
   , title =? "ViM"                                    --> doShift "vim"
   , title =? "ScratchPad"                             --> doSideFloat CE
   , isFullscreen                                      --> doFullFloat
   , isDialog                                          --> doFloat
   ]
+  where unfloat = ask >>= doF . W.sink
 
 --
 --
