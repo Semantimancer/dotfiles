@@ -5,7 +5,7 @@ import System.Exit
 
 import XMonad.Actions.CopyWindow
 import XMonad.Actions.CycleWS (toggleWS)
-import XMonad.Actions.DynamicWorkspaces
+import XMonad.Actions.TopicSpace
 import XMonad.Actions.Search
 import XMonad.Actions.Submap
 
@@ -44,41 +44,67 @@ startupCommands = ["skype","dunst","spotify","spotify-notify","compton"
 
 --
 --
---  WORKSPACES
---  Using XMonad.Actions.DynamicWorkspaces, all workspaces have a name that I can set on
---  the fly. Some workspaces are also considered Fixed and/or Named, which come with
---  special properties. 
---
---  Fixed workspaces are static. These are the only workspaces that are guaranteed to be
---  up at all times, because non-fixed workspaces are removed as soon as they are both
---  empty and unviewed. All fixed workspaces are named, but not vice versa.
---
---  Named workspaces are workspaces with predefined settings. For named workspaces that
---  are also fixed, this means those workspaces simply always have those properties. For
---  those that aren't fixed, it means I have a way of creating a workspace with special
---  properties by simply creating one with a matching name. The setting which all named
---  workspaces share is a shortcut that corresponds with one of the number keys, which
---  can be used to travel to that workspace quickly (without going into visual mode).
+--  TOPICS
+--  Topic spaces let me execute commands upon going to a workspace. Most
+--  workspaces will also have a special directory that terminals will
+--  automatically cd to when called.
+--  
 --
 --
 
-fixedWorkspaces = ["main","vim","chat","media"]
+wsKeys = [xK_BackSpace,xK_1,xK_2,xK_3,xK_4,xK_5,xK_6,xK_7,xK_8,xK_9,xK_0]
 
-namedWs = ["main","vim","chat","writing","gimp","work","reference","compile","steam"
-          ,"media","view"]
+myTopics :: [Topic]
+myTopics = ["dashboard"                                 --Goto: Backspace
+           ,"web","vim","chat","writing","gimp","work"  --Goto: 1-6
+           ,"reference","compile","steam","music"       --Goto: 7-0
+           ,"web","movie"                               --No gotos
+           ]
 
-wsKeys = [xK_1,xK_2,xK_3,xK_4,xK_5,xK_6,xK_7,xK_8,xK_9,xK_0]
+myTopicConfig :: TopicConfig
+myTopicConfig = defaultTopicConfig
+  { topicDirs = M.fromList $ 
+      [("vim","/home/ben/Computer")
+      ,("writing","/home/ben/Documents")
+      ,("compile","/home/ben/Computer")
+      ,("music","/home/ben/Music")
+      ,("movie","/home/ben/Videos")]
+  , defaultTopicAction = const spawnShell
+  , defaultTopic = "dashboard"
+  , topicActions = M.fromList $ 
+      [("web",spawn "vivaldi-snapshot")
+      ,("vim",spawn "urxvt -rv -e vim")
+      ,("writing",spawn "libreoffice")
+      ,("gimp",spawn "gimp")
+      ,("reference",spawn "urxvt -rv -e newsbeuter")
+      ,("music",spawn "spotify")
+      ]
+  }
 
-addHiddenWorkspacePrompt :: X ()
-addHiddenWorkspacePrompt = inputPrompt myXPConfig "Workspace Name" ?+ addHiddenWorkspace
+spawnShell :: X ()
+spawnShell = currentTopicDir myTopicConfig >>= spawnShellIn
 
-clearWorkspace = removeEmptyWorkspaceAfterExcept fixedWorkspaces
+spawnShellIn :: Dir -> X ()
+spawnShellIn dir = spawn $ "urxvt -rv -cd \""++dir++"\""
+
+goto :: Topic -> X ()
+goto = switchTopic myTopicConfig
+
+promptedGoto :: XPConfig -> X ()
+promptedGoto c =  
+  inputPromptWithCompl c "goto" (mkComplFunFromList myTopics) ?+ goto
+
+promptedShift :: XPConfig -> X ()
+promptedShift c = 
+  inputPromptWithCompl c "shift" (mkComplFunFromList myTopics) ?+ 
+    (windows . W.shift)
 
 --
 --
 --  PROMPTS
---  A sizable part of this setup is going to be devoted to prompts from XMonad.Prompt,
---  which I use for writing to files, opening man pages, replacing dmenu, etc.
+--  A sizable part of this setup is going to be devoted to prompts from XMonad.
+--  Prompt, which I use for writing to files, opening man pages, replacing 
+--  dmenu, etc.
 --
 --
 
@@ -153,37 +179,38 @@ parseSearch s = (engine,query)
 --
 --
 --  KEYBINDINGS
---  The basic idea here is a modal shortcut system. There are three modes that XMonad
---  can be in: default mode, visual mode, or command mode. The modes are made with
---  submaps of keybindings, most of which call the submap again.
---
+--  The basic idea here is a modal shortcut system. There are four modes that 
+--  XMonad can be in: default mode, visual mode, command mode, and audio mode. 
+--  The modes are made with submaps of keybindings, most of which call the 
+--  submap again.
 --
 --
 --
 --
 
 keyboard conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
-  --  Default mode has a few convenience functions (ones that I use too often to always 
-  --  have to switch modes) and then shortcuts for going into command or visual.
-  [ ((modm              , xK_Return), spawn $ XMonad.terminal conf)
+  --  Default mode has a few convenience functions (ones that I use too often to 
+  --  always have to switch modes) and then shortcuts for going into command,
+  --  visual, and audio modes.
+  [ ((modm              , xK_Return), currentTopicAction myTopicConfig)
+  , ((modm .|. shiftMask, xK_Return), spawnShell)
 
   , ((modm              , xK_v), submap . M.fromList $ visualMode)
   , ((modm              , xK_semicolon), submap . M.fromList $ commandMode)
   , ((modm              , xK_m), submap . M.fromList $ audioMode)
 
-  --Everything below this point (including the three mapped lists) is here because
-  --I use these commands too much for me to have to enter a specific mode every
-  --time I use one
+  --  Everything below this point (including the three mapped lists) is here 
+  --  because I use these commands too much for me to have to enter a specific 
+  --  mode every time I use one
   , ((modm              , xK_j), windows W.focusDown)
   , ((modm              , xK_k), windows W.focusUp)
-  , ((modm              , xK_minus), clearWorkspace $ toggleWS)
 
   --And a safety function
   , ((modm .|. shiftMask, xK_q), io (exitWith ExitSuccess))
   ] ++ navKeys
   where 
-    --  Command mode is a submap for spawning new processes, calling in XMonad prompts, and
-    --  generally executing actions I find myself doing a lot.
+    --  Command mode is a submap for spawning new processes, calling in XMonad 
+    --  prompts, and generally executing actions I find myself doing a lot.
     commandMode =
       --Command mode is mainly going to be used for prompts...
       [ ((0, xK_o), runOrRaisePrompt myXPConfig)
@@ -202,18 +229,18 @@ keyboard conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
       , ((0, xK_m), submap . M.fromList $ audioMode)
       , ((0, xK_v), submap . M.fromList $ visualMode)
-      ]
-    --  Visual mode is for manipulating the windows on the screen. This means changing 
-    --  focus, rearranging tiles, etc. are handled almost exclusively in visual mode
+      ] ++ navKeys
+    --  Visual mode is for manipulating the windows on the screen. This means 
+    --  changing focus, rearranging tiles, etc. are handled almost exclusively 
+    --  in visual mode
     visualMode =
-      --The easiest use of visual mode is for basic navigation and tile arrangement
+      -- Basic navigation 
       [ ((0, xK_j), windows W.focusDown >> visual)
       , ((0, xK_k), windows W.focusUp >> visual)
       , ((shiftMask, xK_j), windows W.swapDown >> visual)
       , ((shiftMask, xK_k), windows W.swapUp >> visual)
-      , ((0, xK_minus), clearWorkspace $ toggleWS)
 
-      --{modifier}+{h,l} controls sizing of tiles
+      --  {modifier}+{h,l} controls sizing of tiles
       , ((shiftMask, xK_h), sendMessage Shrink >> visual)
       , ((shiftMask, xK_l), sendMessage Expand >> visual)
       , ((controlMask, xK_h), sendMessage MirrorExpand >> visual)
@@ -224,18 +251,14 @@ keyboard conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       , ((0, xK_s), (withFocused $ windows . W.sink) >> visual)
       , ((0, xK_z), (sendMessage $ Toggle FULL) >> visual)
     
-      -- <C-a> and <C-x> increment/decrement the number of tiles in the master area
+      --  <C-a> and <C-x> increment/decrement # of tiles in the master area
       , ((controlMask, xK_a), sendMessage (IncMasterN 1) >> visual)
       , ((controlMask, xK_z), sendMessage (IncMasterN (-1)) >> visual)
     
-      --Visual mode is also where you go to make new workspaces, with o, t, or c.
-      --Shift+O, t, and c all drag (or copy, for c) the currently focused window
-      --into the new workspace.
-      , ((0, xK_o), clearWorkspace $ selectWorkspace myXPConfig)
-      , ((0, xK_t), withWorkspace myXPConfig (windows . W.shift))
-      , ((shiftMask, xK_o), clearWorkspace $ withWorkspace myXPConfig
-                              (\w -> windows $ (W.greedyView w) . (W.shift w)))
-      , ((0, xK_c), withWorkspace myXPConfig (windows . copy))
+      --  Visual mode is also where you go to switch topics with o or O.
+      --  o goes to a topic, shift+O drags the focused window with you.
+      , ((0, xK_o), promptedGoto myXPConfig)
+      , ((shiftMask, xK_o), promptedShift myXPConfig)
 
       , ((0, xK_semicolon), submap . M.fromList $ commandMode)
       , ((0, xK_m), submap . M.fromList $ audioMode)
@@ -271,17 +294,16 @@ keyboard conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
       , ((0, xK_semicolon), submap . M.fromList $ commandMode)
       , ((0, xK_v), submap . M.fromList $ visualMode)
-      ]
+      ] ++ navKeys
     audio = submap . M.fromList $ audioMode
-    --Navigation keys take care of movement between workspaces and screens
+    --Navigation keys take care of movement between screens
     navKeys =
       [((modm .|. m, key), (screenWorkspace sc >>= flip whenJust (windows . f)))
         | (key, sc) <- zip [xK_w, xK_e] [0..]
         , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
       ++
-      [((m .|. modm, k), windows $ f i)
-        | (i, k) <- zip namedWs wsKeys
-        , (f, m) <- [(W.greedyView, 0), (W.shift, shiftMask)]]
+      [((modm, i), switchTopic myTopicConfig j)
+        | (i,j) <- zip wsKeys myTopics ]
 
 mouse (XConfig {XMonad.modMask = modm}) = M.fromList $
   [ ((modm, button1), (\w -> focus w >> mouseMoveWindow w >> windows W.shiftMaster)) ]
@@ -310,7 +332,7 @@ layout = showWName $ mkToggle (single FULL) $ perWS $ smartBorders $ defaultLayo
         chat =    onWorkspace "chat"    $ reflectHoriz Circle
         steam =   onWorkspace "steam"   $ one
         compile = onWorkspace "compile" $ one
-        media =   onWorkspace "media"   $ one ||| reflectHoriz one
+        music =   onWorkspace "media"   $ one ||| reflectHoriz one
         gimp =    onWorkspace "gimp"    $   
                     withIM (0.15) (Role "gimp-toolbox") $ reflectHoriz $
                       withIM (0.20) (Role "gimp-dock") (Mirror tall ||| Full)
@@ -321,26 +343,27 @@ layout = showWName $ mkToggle (single FULL) $ perWS $ smartBorders $ defaultLayo
 
         grid =    onWorkspace "grid"    $ Grid ||| reflectHoriz Circle
 
-        perWS = chat . steam . compile . media . gimp . writing . vim . file . view . grid
+        perWS = chat . steam . compile . music . gimp . writing . vim . file 
+              . view . grid
 
 --
 --
 --  MANAGE HOOK
---  Fairly standard manage hook. Some windows, when spawned, are moved to one of the
---  named workspaces designed for that type of program.
+--  Fairly standard manage hook. Some windows, when spawned, are moved to one 
+--  of the named workspaces designed for that type of program.
 --
 --
 
 myManageHook = composeAll
-  [ className =? "MPlayer"                            --> doShift "media"
-  , className =? "mpv"                                --> doShift "media"
+  [ className =? "MPlayer"                            --> doShift "movie"
+  , className =? "mpv"                                --> doShift "movie"
   , className =? "Gimp"                               --> doShift "gimp"
-  , className =? "feh"						                    --> doFloat
+  , className =? "feh"                                --> doFloat
   , className =? "Firefox" <&&> resource =? "Dialog"  --> doFloat
-  , className =? "Skype"					                    --> doShift "chat"
+  , className =? "Skype"                              --> doShift "chat"
   , className =? "Mumble"                             --> doShift "chat"
   , className =? "Steam"                              --> doShift "steam"
-  , className =? "Spotify"                            --> doShift "media"
+  , className =? "Spotify"                            --> doShift "music"
   , className =? "stalonetry"                         --> doSideFloat NC
   , title =? "ViM"                                    --> doShift "vim"
   , title =? "ScratchPad"                             --> doSideFloat CE
@@ -351,11 +374,12 @@ myManageHook = composeAll
 --
 --
 --  Log Hook
---  This is used to handle the FadeWindows hook. The fadeHook works similarly to other
---  hooks, but because it hits all windows, it has to account for all possibilities. The
---  first line ("opaque") is the default; the isUnfocused line is the thing I want it
---  to handle (most unfocused windows are transparent).
---  Everything after that line are exceptions to the rule; they will reset to opaque.
+--  This is used to handle the FadeWindows hook. The fadeHook works similarly 
+--  to other hooks, but because it hits all windows, it has to account for all 
+--  possibilities. The first line ("opaque") is the default; the isUnfocused 
+--  line is the thing I want it to handle (most unfocused windows are 
+--  transparent). Everything after that line are exceptions to the rule; they 
+--  will reset to opaque.
 --
 --
 
@@ -378,10 +402,10 @@ main = xmonad $ defaultConfig
   , clickJustFocuses    = False
   , borderWidth         = 2
   , modMask             = mod1Mask
-  , workspaces          = fixedWorkspaces
+  , workspaces          = myTopics --fixedWorkspaces
   , keys                = keyboard
   , mouseBindings       = mouse
-  , layoutHook          = showWName layout
+  , layoutHook          = layout
   , manageHook          = myManageHook
   , startupHook         = mapM_ spawn startupCommands
   , logHook             = myLogHook
