@@ -58,7 +58,7 @@ myTopics :: [Topic]
 myTopics = ["dashboard"                                 --Goto: Backspace
            ,"web","vim","chat","writing","gimp","work"  --Goto: 1-6
            ,"reference","compile","steam","music"       --Goto: 7-0
-           ,"movie","view"                              --No gotos
+           ,"movie","view","upload"                     --No gotos
            ]
 
 myTopicConfig :: TopicConfig
@@ -69,7 +69,9 @@ myTopicConfig = defaultTopicConfig
       ,("compile","/home/ben/Computer")
       ,("music","/home/ben/Music")
       ,("movie","/home/ben/Videos")
-      ,("view","/home/ben/Pictures")]
+      ,("view","/home/ben/Pictures")
+      ,("upload","/home/ben/Computer/Web")
+      ]
   , defaultTopicAction = const spawnShell
   , defaultTopic = "dashboard"
   , topicActions = M.fromList $ 
@@ -81,6 +83,7 @@ myTopicConfig = defaultTopicConfig
       ,("reference",spawn "urxvt -rv -e newsbeuter")
       ,("steam",spawn "steam.sh")
       ,("music",spawn "spotify")
+      ,("upload",spawn "filezilla")
       ]
   }
 
@@ -299,14 +302,17 @@ keyboard conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       , ((0, xK_v), submap . M.fromList $ visualMode)
       ] ++ navKeys
     audio = submap . M.fromList $ audioMode
-    --Navigation keys take care of movement between screens
+    --Navigation keys take care of movement between screens and topic spaces
     navKeys =
       [((modm .|. m, key), (screenWorkspace sc >>= flip whenJust (windows . f)))
         | (key, sc) <- zip [xK_w, xK_e] [0..]
         , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
       ++
-      [((modm, i), switchTopic myTopicConfig j)
-        | (i,j) <- zip wsKeys myTopics ]
+      [((m, i), f j)
+        | (i,j) <- zip wsKeys myTopics 
+        , (m,f) <- [(modm,switchTopic myTopicConfig)
+                   ,(modm .|. shiftMask,windows . W.shift)]
+        ]
 
 mouse (XConfig {XMonad.modMask = modm}) = M.fromList $
   [ ((modm, button1), (\w -> focus w >> mouseMoveWindow w >> windows W.shiftMaster)) ]
@@ -332,7 +338,7 @@ layout = showWName $ mkToggle (single FULL) $ perWS $ smartBorders $ defaultLayo
 
         defaultLayouts = tall ||| Mirror tall
 
-        dash =    onWorkspace "dashboard" $ OneBig (1/2) (1/20)
+        dash =    onWorkspace "dashboard" $ OneBig (1/2) (1/25)
         chat =    onWorkspace "chat"    $ reflectHoriz Circle
         steam =   onWorkspace "steam"   $ one
         compile = onWorkspace "compile" $ one
@@ -369,7 +375,7 @@ myManageHook = composeAll
   , className =? "Steam"                              --> doShift "steam"
   , className =? "Spotify"                            --> doShift "music"
   , className =? "stalonetry"                         --> doSideFloat NC
-  , title =? "tint2"                                  --> doShift "dashboard" >> unfloat
+  , className =? "tint2"                              --> doShift "dashboard" >> unfloat
   , title =? "ViM"                                    --> doShift "vim"
   , title =? "ScratchPad"                             --> doSideFloat CE
   , isFullscreen                                      --> doFullFloat
