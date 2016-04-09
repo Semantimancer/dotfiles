@@ -3,6 +3,7 @@ export VISUAL=vim
 export PAGER=less
 export TERMINAL=rxvt
 export BROWSER="firefox"
+export LANG=C
 export PATH=$HOME/Computer/scripts:$HOME/.cabal/bin:$PATH
 PATH="$(ruby -e 'puts Gem.user_dir')/bin:$PATH"
 
@@ -20,15 +21,13 @@ set_prompt(){
   Red='\[\e[01;31m\]'
   Green='\[\e[01;32m\]'
   Reset='\[\e[00m\]'
-  RedX='\342\234\227'
-  Checkmark='\342\234\223'
   
   PS1+="\n$Blue(\\u@\\h)$White-$Red(\\t)$White-$Green(\w)$White\n"
   #If last command was successful, green checkmark. Otherwise, red X.
   if [[ $Last_Command == 0 ]]; then
-    PS1+="$White($Green$Checkmark$White)> "
+    PS1+="$White($Green:::$White)> "
   else
-    PS1+="$White($Last_Command :: $Red$RedX$White)> "
+    PS1+="$White(\[\e[01;31m\]x == $Last_Command$White)> "
   fi
 }
 PROMPT_COMMAND='set_prompt'
@@ -62,7 +61,7 @@ export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
 
 [ ! "$UID" = "0" ] && archbey2
-xrdb .Xresources
+xrdb /home/ben/.Xresources
 
 # OPAM configuration
 . /home/ben/.opam/opam-init/init.sh > /dev/null 2> /dev/null || true
