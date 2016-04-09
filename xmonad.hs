@@ -37,8 +37,7 @@ import qualified Data.Map        as M
 
 notes = "/home/ben/Notes.txt"
 
-startupCommands = ["skype","dunst","spotify","spotify-notify","compton"
-                  ,"urxvt -rv -T ViM -e vim","redshift","tint2"
+startupCommands = ["skype","spotify","spotify-notify"
                   ,"xrandr --output VGA-1 --right-of LVDS-1"
                   ]
 
@@ -58,7 +57,7 @@ myTopics :: [Topic]
 myTopics = ["dashboard"                                 --Goto: Backspace
            ,"web","vim","chat","writing","gimp","work"  --Goto: 1-6
            ,"reference","compile","steam","music"       --Goto: 7-0
-           ,"movie","view","upload"                     --No gotos
+           ,"movie","view","upload","pdf","game","file" --No gotos
            ]
 
 myTopicConfig :: TopicConfig
@@ -71,6 +70,8 @@ myTopicConfig = defaultTopicConfig
       ,("movie","/home/ben/Videos")
       ,("view","/home/ben/Pictures")
       ,("upload","/home/ben/Computer/Web")
+      ,("pdf","/home/ben/Documents")
+      ,("game","/home/ben/Games")
       ]
   , defaultTopicAction = const spawnShell
   , defaultTopic = "dashboard"
@@ -78,7 +79,7 @@ myTopicConfig = defaultTopicConfig
       [("dashboard",spawn "urxvt -rv -e ranger")
       ,("web",spawn "vivaldi-snapshot")
       ,("vim",spawn "urxvt -rv -e vim")
-      ,("writing",spawn "libreoffice")
+      ,("writing",writerPrompt myXPConfig)
       ,("gimp",spawn "gimp")
       ,("reference",spawn "urxvt -rv -e newsbeuter")
       ,("steam",spawn "steam.sh")
@@ -148,7 +149,7 @@ killPrompt c =
   inputPrompt c "kill" ?+ \str -> spawn $ concat ["kill -9 `pgrep ",str,"`"]
 
 searchPrompt :: XPConfig -> X ()
-searchPrompt c = inputPromptWithCompl c "Search" (mkComplFunFromList ss) ?+ search'
+searchPrompt c = inputPromptWithCompl c "search" (mkComplFunFromList ss) ?+ search'
   where ss = ["google","dictionary","wolfram","alpha","wikipedia","youtube","hackage"
              ,"hoogle","imdb","archwiki","aur","gmail","sareth"]
 
@@ -181,6 +182,11 @@ parseSearch s = (engine,query)
         archwiki = "https://wiki.archlinux.org/index.php?title=Special%3ASearch&search="
         aur = "https://aur.archlinux.org/packages/?O=0&K="
         gmail = "https://inbox.google.com/u/0/search/"
+
+writerPrompt :: XPConfig -> X ()
+writerPrompt c = inputPromptWithCompl c "writer" (mkComplFunFromList xs) ?+ f
+  where f x = if x `elem` xs then spawn x else return ()
+        xs = ["libreoffice","focuswriter"]
 
 --
 --
@@ -338,7 +344,6 @@ layout = showWName $ mkToggle (single FULL) $ perWS $ smartBorders $ defaultLayo
 
         defaultLayouts = tall ||| Mirror tall
 
-        dash =    onWorkspace "dashboard" $ OneBig (1/2) (1/25)
         chat =    onWorkspace "chat"    $ reflectHoriz Circle
         steam =   onWorkspace "steam"   $ one
         compile = onWorkspace "compile" $ one
@@ -351,10 +356,7 @@ layout = showWName $ mkToggle (single FULL) $ perWS $ smartBorders $ defaultLayo
         file =    onWorkspace "file"    $ Grid ||| one
         view =    onWorkspace "view"    $ one ||| Grid
 
-        grid =    onWorkspace "grid"    $ Grid ||| reflectHoriz Circle
-
-        perWS = dash . chat . steam . compile . music . gimp . writing . vim 
-              . file . view . grid
+        perWS = chat . steam . compile . music . gimp . writing . vim . file . view
 
 --
 --
@@ -375,7 +377,6 @@ myManageHook = composeAll
   , className =? "Steam"                              --> doShift "steam"
   , className =? "Spotify"                            --> doShift "music"
   , className =? "stalonetry"                         --> doSideFloat NC
-  , className =? "tint2"                              --> doShift "dashboard" >> unfloat
   , title =? "ViM"                                    --> doShift "vim"
   , title =? "ScratchPad"                             --> doSideFloat CE
   , isFullscreen                                      --> doFullFloat
