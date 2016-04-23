@@ -5,6 +5,7 @@ import System.Exit
 
 import XMonad.Actions.CopyWindow
 import XMonad.Actions.CycleWS (toggleWS)
+import XMonad.Actions.DynamicWorkspaces
 import XMonad.Actions.TopicSpace
 import XMonad.Actions.Search
 import XMonad.Actions.Submap
@@ -53,39 +54,38 @@ startupCommands = ["skype","spotify","spotify-notify"
 
 wsKeys = [xK_BackSpace,xK_1,xK_2,xK_3,xK_4,xK_5,xK_6,xK_7,xK_8,xK_9,xK_0]
 
-myTopics :: [Topic]
-myTopics = ["dashboard"                                 --Goto: Backspace
-           ,"web","vim","chat","writing","gimp","work"  --Goto: 1-6
-           ,"reference","compile","steam","music"       --Goto: 7-0
-           ,"movie","view","upload","pdf","game","file" --No gotos
+data TopicItem = TI { topicName :: String
+                    , topicPath :: FilePath
+                    , topicAction :: X ()
+                    }
+
+myTopics :: [TopicItem]
+myTopics = [TI "dashboard"  homedir                       $ spawn "urxvt -rv -e ranger"
+           ,TI "web"        homedir                       $ spawn "vivaldi-snapshot"
+           ,TI "vim"        homedir                       $ spawn "urxvt -rv -T ViM -e vim"
+           ,TI "chat"       homedir                       $ spawn "skype"
+           ,TI "writing"    (homedir++"/Documents")       $ writerPrompt
+           ,TI "gimp"       (homedir++"/Pictures")        $ spawn "gimp"
+           ,TI "work"       homedir                       $ spawnShell
+           ,TI "reference"  homedir                       $ spawn "urxvt -rv -e newsbeuter"
+           ,TI "compile"    (homedir++"/Computer")        $ spawnShell
+           ,TI "game"       (homedir++"/Games")           $ spawnShell
+           ,TI "music"      (homedir++"/Music")           $ spawn "spotify"
+           ,TI "movie"      (homedir++"/Videos")          $ spawnShell
+           ,TI "view"       (homedir++"/Pictures")        $ spawnShell
+           ,TI "upload"     (homedir++"/Computer/Web")    $ spawn "filezilla"
+           ,TI "pdf"        (homedir++"/Documents")       $ spawnShell
+           ,TI "steam"      (homedir++"/home/ben/Games")  $ spawn "steam.sh"
            ]
+  where homedir = "/home/ben"
 
 myTopicConfig :: TopicConfig
 myTopicConfig = defaultTopicConfig
-  { topicDirs = M.fromList $ 
-      [("vim","/home/ben/Computer")
-      ,("writing","/home/ben/Documents")
-      ,("compile","/home/ben/Computer")
-      ,("music","/home/ben/Music")
-      ,("movie","/home/ben/Videos")
-      ,("view","/home/ben/Pictures")
-      ,("upload","/home/ben/Computer/Web")
-      ,("pdf","/home/ben/Documents")
-      ,("game","/home/ben/Games")
-      ]
+  { topicDirs = M.fromList $ map (\(TI n p _) -> (n,p)) myTopics
   , defaultTopicAction = const spawnShell
   , defaultTopic = "dashboard"
-  , topicActions = M.fromList $ 
-      [("dashboard",spawn "urxvt -rv -e ranger")
-      ,("web",spawn "vivaldi-snapshot")
-      ,("vim",spawn "urxvt -rv -e vim")
-      ,("writing",writerPrompt myXPConfig)
-      ,("gimp",spawn "gimp")
-      ,("reference",spawn "urxvt -rv -e newsbeuter")
-      ,("steam",spawn "steam.sh")
-      ,("music",spawn "spotify")
-      ,("upload",spawn "filezilla")
-      ]
+  , topicActions = M.fromList $ map (\(TI n _ a) -> (n,a)) myTopics
+  , maxTopicHistory = 1
   }
 
 spawnShell :: X ()
@@ -94,17 +94,39 @@ spawnShell = currentTopicDir myTopicConfig >>= spawnShellIn
 spawnShellIn :: Dir -> X ()
 spawnShellIn dir = spawn $ "urxvt -rv -cd \""++dir++"\""
 
-goto :: Topic -> X ()
+goto :: WorkspaceId -> X ()
 goto = switchTopic myTopicConfig
 
 promptedGoto :: XPConfig -> X ()
 promptedGoto c =  
-  inputPromptWithCompl c "goto" (mkComplFunFromList myTopics) ?+ goto
+  inputPromptWithCompl c "goto" (mkComplFunFromList (map topicName myTopics)) ?+ 
+    createOrGoto
 
 promptedShift :: XPConfig -> X ()
 promptedShift c = 
-  inputPromptWithCompl c "shift" (mkComplFunFromList myTopics) ?+ 
+  inputPromptWithCompl c "shift" (mkComplFunFromList (map topicName myTopics)) ?+ 
     (windows . W.shift)
+
+createGoto :: WorkspaceId -> X ()
+createGoto w = newWorkspace w >> switchTopic myTopicConfig w
+
+createOrGoto :: WorkspaceId -> X ()
+createOrGoto w = do
+  exists <- workspaceExist w
+  if exists then goto w else createGoto w
+
+newWorkspace :: WorkspaceId -> X ()
+newWorkspace w = do
+  exists <- workspaceExist w
+  if exists then return () else addHiddenWorkspace w
+
+workspaceExist :: WorkspaceId -> X Bool
+workspaceExist w = do
+  xs <- get
+  return $ workspaceExists w (windowset xs)
+
+workspaceExists :: WorkspaceId -> W.StackSet WorkspaceId l a s sd -> Bool
+workspaceExists w ws = w `elem` map W.tag (W.workspaces ws)
 
 --
 --
@@ -183,8 +205,8 @@ parseSearch s = (engine,query)
         aur = "https://aur.archlinux.org/packages/?O=0&K="
         gmail = "https://inbox.google.com/u/0/search/"
 
-writerPrompt :: XPConfig -> X ()
-writerPrompt c = inputPromptWithCompl c "writer" (mkComplFunFromList xs) ?+ f
+writerPrompt :: X ()
+writerPrompt = inputPromptWithCompl myXPConfig "writer" (mkComplFunFromList xs) ?+ f
   where f x = if x `elem` xs then spawn x else return ()
         xs = ["libreoffice","focuswriter"]
 
@@ -204,8 +226,8 @@ keyboard conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
   --  Default mode has a few convenience functions (ones that I use too often to 
   --  always have to switch modes) and then shortcuts for going into command,
   --  visual, and audio modes.
-  [ ((modm              , xK_Return), currentTopicAction myTopicConfig)
-  , ((modm .|. shiftMask, xK_Return), spawnShell)
+  [ ((modm              , xK_Return), spawnShell)
+  , ((modm .|. shiftMask, xK_Return), currentTopicAction myTopicConfig)
 
   , ((modm              , xK_v), submap . M.fromList $ visualMode)
   , ((modm              , xK_semicolon), submap . M.fromList $ commandMode)
@@ -315,7 +337,7 @@ keyboard conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
         , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
       ++
       [((m, i), f j)
-        | (i,j) <- zip wsKeys myTopics 
+        | (i,j) <- zip wsKeys (map topicName myTopics)
         , (m,f) <- [(modm,switchTopic myTopicConfig)
                    ,(modm .|. shiftMask,windows . W.shift)]
         ]
@@ -415,7 +437,7 @@ main = xmonad $ defaultConfig
   , clickJustFocuses    = False
   , borderWidth         = 2
   , modMask             = mod1Mask
-  , workspaces          = myTopics --fixedWorkspaces
+  , workspaces          = map topicName myTopics
   , keys                = keyboard
   , mouseBindings       = mouse
   , layoutHook          = layout
