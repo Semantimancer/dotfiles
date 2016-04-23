@@ -98,14 +98,15 @@ goto :: WorkspaceId -> X ()
 goto = switchTopic myTopicConfig
 
 promptedGoto :: XPConfig -> X ()
-promptedGoto c =  
-  inputPromptWithCompl c "goto" (mkComplFunFromList (map topicName myTopics)) ?+ 
-    createOrGoto
+promptedGoto c = do
+  ws <- getPossibleWorkspaces
+  inputPromptWithCompl c "goto" (mkComplFunFromList ws) ?+  
+    (removeEmptyWorkspaceAfter . createOrGoto)
 
 promptedShift :: XPConfig -> X ()
-promptedShift c = 
-  inputPromptWithCompl c "shift" (mkComplFunFromList (map topicName myTopics)) ?+ 
-    (windows . W.shift)
+promptedShift c = do
+  ws <- getPossibleWorkspaces
+  inputPromptWithCompl c "shift" (mkComplFunFromList ws) ?+ (windows . W.shift)
 
 createGoto :: WorkspaceId -> X ()
 createGoto w = newWorkspace w >> switchTopic myTopicConfig w
@@ -127,6 +128,15 @@ workspaceExist w = do
 
 workspaceExists :: WorkspaceId -> W.StackSet WorkspaceId l a s sd -> Bool
 workspaceExists w ws = w `elem` map W.tag (W.workspaces ws)
+
+getPossibleWorkspaces :: X [WorkspaceId]
+getPossibleWorkspaces = do
+  ws <- get
+  return $ ts++(filter (`notElem` ts) (existingWorkspaces (windowset ws)))
+  where ts = map topicName myTopics
+
+existingWorkspaces :: W.StackSet WorkspaceId l a s sd -> [String]
+existingWorkspaces ws = map W.tag $ W.workspaces ws
 
 --
 --
@@ -338,7 +348,7 @@ keyboard conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       ++
       [((m, i), f j)
         | (i,j) <- zip wsKeys (map topicName myTopics)
-        , (m,f) <- [(modm,switchTopic myTopicConfig)
+        , (m,f) <- [(modm,removeEmptyWorkspaceAfter . switchTopic myTopicConfig)
                    ,(modm .|. shiftMask,windows . W.shift)]
         ]
 
