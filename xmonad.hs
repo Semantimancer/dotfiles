@@ -98,15 +98,20 @@ goto :: WorkspaceId -> X ()
 goto = switchTopic myTopicConfig
 
 promptedGoto :: XPConfig -> X ()
-promptedGoto c = do
-  ws <- getPossibleWorkspaces
-  inputPromptWithCompl c "goto" (mkComplFunFromList ws) ?+  
-    (removeEmptyWorkspaceAfter . createOrGoto)
+promptedGoto c = promptedAction c "goto" (removeEmptyWorkspaceAfter . createOrGoto)
 
 promptedShift :: XPConfig -> X ()
-promptedShift c = do
+promptedShift c = promptedAction c "shift" (windows . W.shift)
+
+promptedCopy :: XPConfig -> X ()
+promptedCopy c = promptedAction c "copy" createAndCopy
+  where createAndCopy w = do newWorkspace w
+                             windows $ copy w
+
+promptedAction :: XPConfig -> String -> (WorkspaceId -> X ()) -> X ()
+promptedAction c str f = do
   ws <- getPossibleWorkspaces
-  inputPromptWithCompl c "shift" (mkComplFunFromList ws) ?+ (windows . W.shift)
+  inputPromptWithCompl c str (mkComplFunFromList ws) ?+ f
 
 createGoto :: WorkspaceId -> X ()
 createGoto w = newWorkspace w >> switchTopic myTopicConfig w
@@ -299,10 +304,12 @@ keyboard conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       , ((controlMask, xK_a), sendMessage (IncMasterN 1) >> visual)
       , ((controlMask, xK_z), sendMessage (IncMasterN (-1)) >> visual)
     
-      --  Visual mode is also where you go to switch topics with o or O.
+      --  Visual mode is also where you go to switch topics with o or O, or copy
+      --  windows to other workspaces with c. 
       --  o goes to a topic, shift+O drags the focused window with you.
       , ((0, xK_o), promptedGoto myXPConfig)
       , ((shiftMask, xK_o), promptedShift myXPConfig)
+      , ((0, xK_c), promptedCopy myXPConfig)
 
       , ((0, xK_semicolon), submap . M.fromList $ commandMode)
       , ((0, xK_m), submap . M.fromList $ audioMode)
