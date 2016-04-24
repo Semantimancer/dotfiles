@@ -60,14 +60,14 @@ data TopicItem = TI { topicName :: String
                     }
 
 myTopics :: [TopicItem]
-myTopics = [TI "dashboard"  homedir                       $ spawn "urxvt -rv -e ranger"
+myTopics = [TI "dashboard"  homedir                       $ spawn' "Ranger" "ranger"
            ,TI "web"        homedir                       $ spawn "vivaldi-snapshot"
-           ,TI "vim"        homedir                       $ spawn "urxvt -rv -T ViM -e vim"
+           ,TI "vim"        homedir                       $ spawn' "ViM" "vim"
            ,TI "chat"       homedir                       $ spawn "skype"
            ,TI "writing"    (homedir++"/Documents")       $ writerPrompt
            ,TI "gimp"       (homedir++"/Pictures")        $ spawn "gimp"
            ,TI "work"       homedir                       $ spawnShell
-           ,TI "reference"  homedir                       $ spawn "urxvt -rv -e newsbeuter"
+           ,TI "reference"  homedir                       $ spawn' "News" "newsbeuter"
            ,TI "compile"    (homedir++"/Computer")        $ spawnShell
            ,TI "game"       (homedir++"/Games")           $ spawnShell
            ,TI "music"      (homedir++"/Music")           $ spawn "spotify"
@@ -78,6 +78,7 @@ myTopics = [TI "dashboard"  homedir                       $ spawn "urxvt -rv -e 
            ,TI "steam"      (homedir++"/home/ben/Games")  $ spawn "steam.sh"
            ]
   where homedir = "/home/ben"
+        spawn' x y = spawn $ "urxvt -rv -T "++x++" -e "++y
 
 myTopicConfig :: TopicConfig
 myTopicConfig = defaultTopicConfig
@@ -417,6 +418,8 @@ myManageHook = composeAll
   , className =? "Spotify"                            --> doShift "music"
   , className =? "stalonetry"                         --> doSideFloat NC
   , title =? "ViM"                                    --> doShift "vim"
+  , title =? "Ranger"                                 --> doShift "dashboard"
+  , title =? "News"                                   --> doShift "reference"
   , title =? "ScratchPad"                             --> doSideFloat CE
   , isFullscreen                                      --> doFullFloat
   , isDialog                                          --> doFloat
@@ -448,9 +451,9 @@ myLogHook = fadeWindowsLogHook fadeHook
 main :: IO ()
 main = xmonad $ defaultConfig
   { terminal            = "urxvt -rv"
-  , normalBorderColor   = "#495157"
-  , focusedBorderColor  = "#61849B"
-  , focusFollowsMouse   = True
+  , normalBorderColor   = "#39474A"
+  , focusedBorderColor  = "#567A6E"
+  , focusFollowsMouse   = False
   , clickJustFocuses    = False
   , borderWidth         = 2
   , modMask             = mod1Mask

@@ -10,44 +10,30 @@ URxvt*.urgentOnBell: true
 URxvt*.visualBell: false
 
 URxvt*.scrollBar: false
-!URxvt*.transparent: true
-!URxvt*.shading: 10
 
 URxvt*.font: xft:hack:Regular:size=8
 URxvt*.letterSpace: -1
 
 URxvt*.cursorBlink: true
 URxvt*.cursorUnderline: true
-URxvt*.cursorColor: #ffffaf
 
-!Black
-*.color0:  #000000
-*.color8:  #000000
+! Relic Dark colors
+*background: #4D5456
+*cursorColor: #BE5E1E
 
-!Red
-*.color1:  #dfaf87
-*.color9:  #dfaf87
-
-!Green
-*.color2:  #afdf87
-*.color10: #afdf87
-
-!Yellow
-*.color3:  #dfdf87
-*.color11: #dfdf87
-
-!Blue
-*.color4:  #87afdf
-*.color12: #87afdf
-
-!Magenta
-*.color5:  #dfafdf
-*.color13: #dfafdf
-
-!Cyan
-*.color6:  #1787df
-*.color14: #1787df
-
-!Light Grey/White
-*.color7:  #aeaeae
-*.color15: #aeaeae
+*color0:  #39474A
+*color1:  #986345
+*color2:  #788249
+*color3:  #9B6A46
+*color4:  #3E5951
+*color5:  #B9924A
+*color6:  #5d796a
+*color7:  #977D5E
+*color8:  #4C5F63
+*color9:  #B07350
+*color10: #869151
+*color11: #AF6B42
+*color12: #567A6E
+*color13: #D69D55
+*color14: #668574
+*color15: #AB9C71
