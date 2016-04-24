@@ -14,7 +14,7 @@ hi clear
 if exists("syntax_on")
   syntax reset
 endif
-let g:colors_name = "nucolors"
+let g:colors_name = "nurelic"
 
 hi Normal                    ctermfg=blue
 
@@ -29,6 +29,9 @@ hi Folded                    ctermfg=grey ctermbg=none
 hi FoldColumn                ctermfg=grey ctermbg=none
 
 hi Directory                 cterm=bold ctermfg=blue
+hi StatusLine                cterm=bold ctermfg=red ctermbg=darkblue
+hi StatusLineNC              ctermfg=darkblue ctermbg=none
+hi VertSplit                 ctermfg=darkblue ctermbg=none
 
 hi Comment                   ctermfg=black
 hi Todo                      cterm=bold ctermfg=red ctermbg=none
