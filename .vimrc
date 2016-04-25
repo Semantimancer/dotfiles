@@ -9,7 +9,7 @@ set nu
 set rnu
 
 " Make it look prettier
-colorscheme xoria256
+colorscheme nurelic
 
 " Make it easier to use (especially for Haskell)
 set tabstop=2 shiftwidth=2 expandtab

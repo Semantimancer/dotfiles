@@ -54,6 +54,10 @@ startupCommands = ["skype","spotify","spotify-notify"
 
 wsKeys = [xK_BackSpace,xK_1,xK_2,xK_3,xK_4,xK_5,xK_6,xK_7,xK_8,xK_9,xK_0]
 
+clearWorkspace :: X () -> X ()
+clearWorkspace = removeEmptyWorkspaceAfterExcept stickies
+  where stickies = take 11 $ map topicName myTopics
+
 data TopicItem = TI { topicName :: String
                     , topicPath :: FilePath
                     , topicAction :: X ()
@@ -99,7 +103,7 @@ goto :: WorkspaceId -> X ()
 goto = switchTopic myTopicConfig
 
 promptedGoto :: XPConfig -> X ()
-promptedGoto c = promptedAction c "goto" (removeEmptyWorkspaceAfter . createOrGoto)
+promptedGoto c = promptedAction c "goto" (clearWorkspace . createOrGoto)
 
 promptedShift :: XPConfig -> X ()
 promptedShift c = promptedAction c "shift" (windows . W.shift)
@@ -356,7 +360,7 @@ keyboard conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       ++
       [((m, i), f j)
         | (i,j) <- zip wsKeys (map topicName myTopics)
-        , (m,f) <- [(modm,removeEmptyWorkspaceAfter . switchTopic myTopicConfig)
+        , (m,f) <- [(modm,clearWorkspace . switchTopic myTopicConfig)
                    ,(modm .|. shiftMask,windows . W.shift)]
         ]
 
