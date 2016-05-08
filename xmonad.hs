@@ -13,8 +13,8 @@ import XMonad.Actions.Submap
 import XMonad.Hooks.FadeWindows
 import XMonad.Hooks.ManageHelpers
 
+import XMonad.Layout.BinarySpacePartition
 import XMonad.Layout.Circle
-import XMonad.Layout.Grid
 import XMonad.Layout.IM
 import XMonad.Layout.MultiToggle
 import XMonad.Layout.MultiToggle.Instances
@@ -22,7 +22,6 @@ import XMonad.Layout.NoBorders
 import XMonad.Layout.OneBig
 import XMonad.Layout.PerWorkspace
 import XMonad.Layout.Reflect
-import XMonad.Layout.ResizableTile
 import XMonad.Layout.ShowWName
 import XMonad.Layout.Spacing
 
@@ -294,23 +293,26 @@ keyboard conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       -- Basic navigation 
       [ ((0, xK_j), windows W.focusDown >> visual)
       , ((0, xK_k), windows W.focusUp >> visual)
+      , ((controlMask, xK_u), sendMessage FocusParent >> visual)
+
+      -- Moving tiles around
       , ((shiftMask, xK_j), windows W.swapDown >> visual)
       , ((shiftMask, xK_k), windows W.swapUp >> visual)
+      , ((0, xK_y), sendMessage SelectNode >> visual)
+      , ((0, xK_p), sendMessage MoveNode)
+      , ((0, xK_Return), sendMessage Swap >> visual)
+      , ((shiftMask, xK_Return), sendMessage Rotate >> visual)
 
-      --  {modifier}+{h,l} controls sizing of tiles
-      , ((shiftMask, xK_h), sendMessage Shrink >> visual)
-      , ((shiftMask, xK_l), sendMessage Expand >> visual)
-      , ((controlMask, xK_h), sendMessage MirrorExpand >> visual)
-      , ((controlMask, xK_l), sendMessage MirrorShrink >> visual)
+      --  control+{h,j,k,l controls sizing of tiles
+      , ((controlMask, xK_l), sendMessage (MoveSplit R) >> visual)
+      , ((controlMask, xK_h), sendMessage (MoveSplit L) >> visual)
+      , ((controlMask, xK_j), sendMessage (MoveSplit D) >> visual)
+      , ((controlMask, xK_k), sendMessage (MoveSplit U) >> visual)
     
       , ((0, xK_d), kill1)
       , ((0, xK_space), sendMessage NextLayout >> visual)
       , ((0, xK_s), (withFocused $ windows . W.sink) >> visual)
       , ((0, xK_z), (sendMessage $ Toggle FULL) >> visual)
-    
-      --  <C-a> and <C-x> increment/decrement # of tiles in the master area
-      , ((controlMask, xK_a), sendMessage (IncMasterN 1) >> visual)
-      , ((controlMask, xK_z), sendMessage (IncMasterN (-1)) >> visual)
     
       --  Visual mode is also where you go to switch topics with o or O, or copy
       --  windows to other workspaces with c. 
@@ -373,8 +375,8 @@ mouse (XConfig {XMonad.modMask = modm}) = M.fromList $
 --
 --
 --  LAYOUT
---  Basic layout uses ResizableTall (in two orientations) and Full. Any number of tiles
---  can be merged into a Tabbed tile in visual mode. 
+--  Basic layout uses BinarySpacePartition, and all layouts can "zoom in" to only display
+--  the currently-focused window (full).
 --
 --  There are also custom layouts for particular named workspaces. Each of these layouts
 --  is given its own line below the "where" and then strung together at the end with the
@@ -385,11 +387,8 @@ mouse (XConfig {XMonad.modMask = modm}) = M.fromList $
 --
 --
 
-layout = showWName $ mkToggle (single FULL) $ perWS $ smartBorders $ defaultLayouts
-  where tall = smartSpacing 5 $ ResizableTall 1 (1/100) (1/2) []
-        one = smartSpacing 5 $ OneBig (3/4) (3/4)
-
-        defaultLayouts = tall ||| Mirror tall
+layout = showWName $ mkToggle (single FULL) $ perWS $ smartBorders $ emptyBSP
+  where one = smartSpacing 5 $ OneBig (3/4) (3/4)
 
         chat =    onWorkspace "chat"    $ reflectHoriz Circle
         steam =   onWorkspace "steam"   $ one
@@ -397,12 +396,12 @@ layout = showWName $ mkToggle (single FULL) $ perWS $ smartBorders $ defaultLayo
         music =   onWorkspace "media"   $ one ||| reflectHoriz one
         gimp =    onWorkspace "gimp"    $   
                     withIM (0.15) (Role "gimp-toolbox") $ reflectHoriz $
-                      withIM (0.20) (Role "gimp-dock") (Mirror tall ||| Full)
-        writing = onWorkspace "writing" $ one ||| Grid
-        vim =     onWorkspace "vim"     $ one ||| tall
-        file =    onWorkspace "file"    $ Grid ||| one
-        view =    onWorkspace "view"    $ one ||| Grid
-        movie =   onWorkspace "movie"   $ one ||| Grid
+                      withIM (0.20) (Role "gimp-dock") (emptyBSP ||| Full)
+        writing = onWorkspace "writing" $ one ||| emptyBSP
+        vim =     onWorkspace "vim"     $ one ||| emptyBSP
+        file =    onWorkspace "file"    $ emptyBSP ||| one
+        view =    onWorkspace "view"    $ one ||| emptyBSP
+        movie =   onWorkspace "movie"   $ one ||| emptyBSP
 
         perWS = chat . steam . compile . music . gimp . writing . vim . file . view
               . movie
