@@ -38,7 +38,7 @@ import qualified Data.Map        as M
 
 notes = "/home/ben/Notes.txt"
 
-startupCommands = ["skype","spotify","spotify-notify"
+startupCommands = ["skype","spotify" 
                   ,"xrandr --output VGA-1 --right-of LVDS-1"
                   ]
 
@@ -230,6 +230,9 @@ writerPrompt = inputPromptWithCompl myXPConfig "writer" (mkComplFunFromList xs) 
   where f x = if x `elem` xs then spawn x else return ()
         xs = ["libreoffice","focuswriter"]
 
+spotifyCommand :: String -> X ()
+spotifyCommand str = spawn $ "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player."++str
+
 --
 --
 --  KEYBINDINGS
@@ -344,9 +347,9 @@ keyboard conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       , ((0, xK_0), spawn "amixer set Master 100%" >> audio)
 
       --Now for Spotify
-      , ((0, xK_l), spawn "spotify-notify -a next" >> audio)
-      , ((0, xK_h), spawn "spotify-notify -a previous" >> audio)
-      , ((0, xK_space), spawn "spotify-notify -a playPause" >> audio)
+      , ((0, xK_l), spotifyCommand "Next" >> audio)
+      , ((0, xK_h), spotifyCommand "Previous" >> audio)
+      , ((0, xK_space), spotifyCommand "PlayPause" >> audio)
 
       , ((0, xK_semicolon), submap . M.fromList $ commandMode)
       , ((0, xK_v), submap . M.fromList $ visualMode)
@@ -399,8 +402,10 @@ layout = showWName $ mkToggle (single FULL) $ perWS $ smartBorders $ defaultLayo
         vim =     onWorkspace "vim"     $ one ||| tall
         file =    onWorkspace "file"    $ Grid ||| one
         view =    onWorkspace "view"    $ one ||| Grid
+        movie =   onWorkspace "movie"   $ one ||| Grid
 
         perWS = chat . steam . compile . music . gimp . writing . vim . file . view
+              . movie
 
 --
 --
