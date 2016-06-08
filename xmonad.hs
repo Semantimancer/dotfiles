@@ -232,6 +232,13 @@ writerPrompt = inputPromptWithCompl myXPConfig "writer" (mkComplFunFromList xs) 
 spotifyCommand :: String -> X ()
 spotifyCommand str = spawn $ "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player."++str
 
+wallpaperCommand :: String -> X ()
+wallpaperCommand str = case str of
+  "toggle"  -> spawn ("/home/ben/.wallpaper/toggle.sh")
+  "bg"      -> spawn ("echo 'BG' > /home/ben/.wallpaper/toggle && "++wallpapers)
+  _         -> spawn wallpapers
+  where wallpapers = "/home/ben/.wallpaper/wallpapers.sh"
+
 --
 --
 --  KEYBINDINGS
@@ -303,16 +310,21 @@ keyboard conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       , ((0, xK_Return), sendMessage Swap >> visual)
       , ((shiftMask, xK_Return), sendMessage Rotate >> visual)
 
+      , ((0, xK_d), kill1)
+      , ((0, xK_space), sendMessage NextLayout >> visual)
+      , ((0, xK_s), (withFocused $ windows . W.sink) >> visual)
+      , ((0, xK_z), (sendMessage $ Toggle FULL) >> visual)
+    
       --  control+{h,j,k,l controls sizing of tiles
       , ((controlMask, xK_l), sendMessage (MoveSplit R) >> visual)
       , ((controlMask, xK_h), sendMessage (MoveSplit L) >> visual)
       , ((controlMask, xK_j), sendMessage (MoveSplit D) >> visual)
       , ((controlMask, xK_k), sendMessage (MoveSplit U) >> visual)
-    
-      , ((0, xK_d), kill1)
-      , ((0, xK_space), sendMessage NextLayout >> visual)
-      , ((0, xK_s), (withFocused $ windows . W.sink) >> visual)
-      , ((0, xK_z), (sendMessage $ Toggle FULL) >> visual)
+
+      -- Playing with wallpapers
+      , ((0, xK_w), wallpaperCommand "bg" >> visual)
+      , ((shiftMask, xK_w), wallpaperCommand "toggle" >> visual)
+      , ((controlMask, xK_w), wallpaperCommand "" >> visual)
     
       --  Visual mode is also where you go to switch topics with o or O, or copy
       --  windows to other workspaces with c. 
@@ -321,6 +333,7 @@ keyboard conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       , ((shiftMask, xK_o), promptedShift myXPConfig)
       , ((0, xK_c), promptedCopy myXPConfig)
 
+      -- Switching to other modes
       , ((0, xK_semicolon), submap . M.fromList $ commandMode)
       , ((0, xK_m), submap . M.fromList $ audioMode)
       ] ++ navKeys
