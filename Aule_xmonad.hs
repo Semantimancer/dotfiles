@@ -465,7 +465,10 @@ myLogHook = fadeWindowsLogHook fadeHook
                               , className =? "Netflix"  --> opaque
                               , className =? "MPlayer"  --> opaque
                               , className =? "mpv"      --> opaque
+                              , iconName =? gimpName    --> opaque
                               ]
+        gimpName = "GNU Image Manipulation Program"
+        iconName = stringProperty "WM_ICON_NAME"
 
 main :: IO ()
 main = xmonad $ defaultConfig
