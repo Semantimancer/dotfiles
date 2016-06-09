@@ -339,25 +339,25 @@ keyboard conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     --Audio Mode deals with volume and spotify
     audioMode = 
       --Volume controls first
-      [ ((0, xK_m), spawn "amixer set Master toggle" >> audio)
+      [ ((0, xK_m), spawn "pamixer -t" >> audio)
 
-      , ((0, xK_j),           spawn "amixer set Master 10%-" >> audio)
-      , ((shiftMask, xK_j),   spawn "amixer set Master 20%-" >> audio)
-      , ((controlMask, xK_j), spawn "amixer set Master 5%-" >> audio)
-      , ((0, xK_k),           spawn "amixer set Master 10%+" >> audio)
-      , ((shiftMask, xK_k),   spawn "amixer set Master 20%+" >> audio)
-      , ((controlMask, xK_k), spawn "amixer set Master 5%+" >> audio)
+      , ((0, xK_j),           spawn "pamixer --decrease 10")
+      , ((shiftMask, xK_j),   spawn "pamixer --decrease 20")
+      , ((controlMask, xK_j), spawn "pamixer --decrease 5")
+      , ((0, xK_k),           spawn "pamixer --increase 10")
+      , ((shiftMask, xK_k),   spawn "pamixer --increase 20")
+      , ((controlMask, xK_k), spawn "pamixer --increase 5")
 
-      , ((0, xK_1), spawn "amixer set Master 10%" >> audio)
-      , ((0, xK_2), spawn "amixer set Master 20%" >> audio)
-      , ((0, xK_3), spawn "amixer set Master 30%" >> audio)
-      , ((0, xK_4), spawn "amixer set Master 40%" >> audio)
-      , ((0, xK_5), spawn "amixer set Master 50%" >> audio)
-      , ((0, xK_6), spawn "amixer set Master 60%" >> audio)
-      , ((0, xK_7), spawn "amixer set Master 70%" >> audio)
-      , ((0, xK_8), spawn "amixer set Master 80%" >> audio)
-      , ((0, xK_9), spawn "amixer set Master 90%" >> audio)
-      , ((0, xK_0), spawn "amixer set Master 100%" >> audio)
+      , ((0, xK_1), spawn "pamixer --set-volume 10" >> audio)
+      , ((0, xK_2), spawn "pamixer --set-volume 20" >> audio)
+      , ((0, xK_3), spawn "pamixer --set-volume 30" >> audio)
+      , ((0, xK_4), spawn "pamixer --set-volume 40" >> audio)
+      , ((0, xK_5), spawn "pamixer --set-volume 50" >> audio)
+      , ((0, xK_6), spawn "pamixer --set-volume 60" >> audio)
+      , ((0, xK_7), spawn "pamixer --set-volume 70" >> audio)
+      , ((0, xK_8), spawn "pamixer --set-volume 80" >> audio)
+      , ((0, xK_9), spawn "pamixer --set-volume 90" >> audio)
+      , ((0, xK_0), spawn "pamixer --set-volume 100" >> audio)
 
       --Now for Spotify
       , ((0, xK_l), spotifyCommand "Next" >> audio)
