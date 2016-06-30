@@ -59,6 +59,7 @@ alias ........='cd ../../../../../../..'
 export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
 
-
 # OPAM configuration
 . /home/ben/.opam/opam-init/init.sh > /dev/null 2> /dev/null || true
+
+cmatrix -ab
