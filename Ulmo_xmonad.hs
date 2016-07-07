@@ -37,9 +37,7 @@ import qualified Data.Map        as M
 
 notes = "/home/ben/Notes.txt"
 
-startupCommands = ["skype","spotify" 
-                  ,"xrandr --output VGA-1 --right-of LVDS-1"
-                  ]
+startupCommands = ["skype","rawdog -Wuw"]
 
 --
 --
@@ -64,13 +62,13 @@ data TopicItem = TI { topicName :: String
 
 myTopics :: [TopicItem]
 myTopics = [TI "dashboard"  homedir                       $ spawn' "Ranger" "ranger"
-           ,TI "web"        homedir                       $ spawn "vivaldi-snapshot"
+           ,TI "web"        homedir                       $ spawn "firefox"
            ,TI "vim"        homedir                       $ spawn' "ViM" "vim"
            ,TI "chat"       homedir                       $ spawn "skype"
            ,TI "writing"    (homedir++"/Documents")       $ writerPrompt
            ,TI "gimp"       (homedir++"/Pictures")        $ spawn "gimp"
            ,TI "work"       homedir                       $ spawnShell
-           ,TI "reference"  homedir                       $ spawn' "News" "newsbeuter"
+           ,TI "reference"  homedir                       $ spawnShell
            ,TI "compile"    (homedir++"/Computer")        $ spawnShell
            ,TI "game"       (homedir++"/Games")           $ spawnShell
            ,TI "music"      (homedir++"/Music")           $ spawn "spotify"
@@ -81,7 +79,7 @@ myTopics = [TI "dashboard"  homedir                       $ spawn' "Ranger" "ran
            ,TI "steam"      (homedir++"/home/ben/Games")  $ spawn "steam.sh"
            ]
   where homedir = "/home/ben"
-        spawn' x y = spawn $ "urxvt -rv -T "++x++" -e "++y
+        spawn' x y = spawn $ "urxvt -T "++x++" -e "++y
 
 myTopicConfig :: TopicConfig
 myTopicConfig = defaultTopicConfig
@@ -96,7 +94,7 @@ spawnShell :: X ()
 spawnShell = currentTopicDir myTopicConfig >>= spawnShellIn
 
 spawnShellIn :: Dir -> X ()
-spawnShellIn dir = spawn $ "urxvt -rv -cd \""++dir++"\""
+spawnShellIn dir = spawn $ "urxvt -cd \""++dir++"\""
 
 goto :: WorkspaceId -> X ()
 goto = switchTopic myTopicConfig
@@ -195,7 +193,7 @@ searchPrompt c = inputPromptWithCompl c "search" (mkComplFunFromList ss) ?+ sear
              ,"hoogle","imdb","archwiki","aur","gmail","sareth"]
 
 search' :: String -> X ()
-search' s = search "vivaldi-snapshot" (use engine) query
+search' s = search "firefox" (use engine) query
   where (engine,query) = parseSearch s
 
 parseSearch :: String -> (SearchEngine,String)
@@ -227,7 +225,7 @@ parseSearch s = (engine,query)
 writerPrompt :: X ()
 writerPrompt = inputPromptWithCompl myXPConfig "writer" (mkComplFunFromList xs) ?+ f
   where f x = if x `elem` xs then spawn x else return ()
-        xs = ["libreoffice","focuswriter"]
+        xs = ["libreoffice","turtl"]
 
 spotifyCommand :: String -> X ()
 spotifyCommand str = spawn $ "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player."++str
@@ -286,9 +284,9 @@ keyboard conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       -- ...but occasionally I'll use it to spawn something else
       , ((0, xK_Return), spawn $ XMonad.terminal conf)
       , ((0, xK_x), spawn "xmonad --recompile; xmonad --restart")
-      , ((0, xK_e), spawn "urxvt -rv -T ViM -e vim")
-      , ((0, xK_t), spawn "urxvt -T ScratchPad -rv")
-      , ((0, xK_r), spawn "urxvt -rv -T Ranger -e ranger")
+      , ((0, xK_e), spawn "urxvt -T ViM -e vim")
+      , ((0, xK_t), spawn "urxvt -T ScratchPad")
+      , ((0, xK_r), spawn "urxvt -T Ranger -e ranger")
 
       , ((0, xK_m), submap . M.fromList $ audioMode)
       , ((0, xK_v), submap . M.fromList $ visualMode)
@@ -306,9 +304,10 @@ keyboard conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       , ((shiftMask, xK_j), windows W.swapDown >> visual)
       , ((shiftMask, xK_k), windows W.swapUp >> visual)
       , ((0, xK_y), sendMessage SelectNode >> visual)
+      , ((controlMask, xK_a), sendMessage FocusParent >> visual)
       , ((0, xK_p), sendMessage MoveNode)
-      , ((0, xK_Return), sendMessage Swap >> visual)
-      , ((shiftMask, xK_Return), sendMessage Rotate >> visual)
+      , ((0, xK_Return), sendMessage Swap)
+      , ((shiftMask, xK_Return), sendMessage Rotate)
 
       , ((0, xK_d), kill1)
       , ((0, xK_space), sendMessage NextLayout >> visual)
@@ -341,25 +340,25 @@ keyboard conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     --Audio Mode deals with volume and spotify
     audioMode = 
       --Volume controls first
-      [ ((0, xK_m), spawn "amixer set Master toggle" >> audio)
+      [ ((0, xK_m), spawn "pamixer -t" >> audio)
 
-      , ((0, xK_j),           spawn "amixer set Master 10%-" >> audio)
-      , ((shiftMask, xK_j),   spawn "amixer set Master 20%-" >> audio)
-      , ((controlMask, xK_j), spawn "amixer set Master 5%-" >> audio)
-      , ((0, xK_k),           spawn "amixer set Master 10%+" >> audio)
-      , ((shiftMask, xK_k),   spawn "amixer set Master 20%+" >> audio)
-      , ((controlMask, xK_k), spawn "amixer set Master 5%+" >> audio)
+      , ((0, xK_j),           spawn "pamixer --decrease 10")
+      , ((shiftMask, xK_j),   spawn "pamixer --decrease 20")
+      , ((controlMask, xK_j), spawn "pamixer --decrease 5")
+      , ((0, xK_k),           spawn "pamixer --increase 10")
+      , ((shiftMask, xK_k),   spawn "pamixer --increase 20")
+      , ((controlMask, xK_k), spawn "pamixer --increase 5")
 
-      , ((0, xK_1), spawn "amixer set Master 10%" >> audio)
-      , ((0, xK_2), spawn "amixer set Master 20%" >> audio)
-      , ((0, xK_3), spawn "amixer set Master 30%" >> audio)
-      , ((0, xK_4), spawn "amixer set Master 40%" >> audio)
-      , ((0, xK_5), spawn "amixer set Master 50%" >> audio)
-      , ((0, xK_6), spawn "amixer set Master 60%" >> audio)
-      , ((0, xK_7), spawn "amixer set Master 70%" >> audio)
-      , ((0, xK_8), spawn "amixer set Master 80%" >> audio)
-      , ((0, xK_9), spawn "amixer set Master 90%" >> audio)
-      , ((0, xK_0), spawn "amixer set Master 100%" >> audio)
+      , ((0, xK_1), spawn "pamixer --set-volume 10" >> audio)
+      , ((0, xK_2), spawn "pamixer --set-volume 20" >> audio)
+      , ((0, xK_3), spawn "pamixer --set-volume 30" >> audio)
+      , ((0, xK_4), spawn "pamixer --set-volume 40" >> audio)
+      , ((0, xK_5), spawn "pamixer --set-volume 50" >> audio)
+      , ((0, xK_6), spawn "pamixer --set-volume 60" >> audio)
+      , ((0, xK_7), spawn "pamixer --set-volume 70" >> audio)
+      , ((0, xK_8), spawn "pamixer --set-volume 80" >> audio)
+      , ((0, xK_9), spawn "pamixer --set-volume 90" >> audio)
+      , ((0, xK_0), spawn "pamixer --set-volume 100" >> audio)
 
       --Now for Spotify
       , ((0, xK_l), spotifyCommand "Next" >> audio)
@@ -464,14 +463,17 @@ myLogHook = fadeWindowsLogHook fadeHook
         fadeHook = composeAll [ opaque 
                               , isUnfocused             --> transparency 0.3
                               , isFloating              --> opaque
-                              , className =? "Netflix"  --> opaque
+                              , className =? "chromium" --> opaque
                               , className =? "MPlayer"  --> opaque
                               , className =? "mpv"      --> opaque
+                              , iconName =? gimpName    --> opaque
                               ]
+        gimpName = "GNU Image Manipulation Program"
+        iconName = stringProperty "WM_ICON_NAME"
 
 main :: IO ()
 main = xmonad $ defaultConfig
-  { terminal            = "urxvt -rv"
+  { terminal            = "urxvt"
   , normalBorderColor   = "#39474A"
   , focusedBorderColor  = "#567A6E"
   , focusFollowsMouse   = False
