@@ -68,7 +68,7 @@ myTopics = [TI "dashboard"  homedir                       $ spawn' "Ranger" "ran
            ,TI "writing"    (homedir++"/Documents")       $ writerPrompt
            ,TI "gimp"       (homedir++"/Pictures")        $ spawn "gimp"
            ,TI "work"       homedir                       $ spawnShell
-           ,TI "reference"  homedir                       $ spawnShell
+           ,TI "reference"  homedir                       $ spawn "wmail"
            ,TI "compile"    (homedir++"/Computer")        $ spawnShell
            ,TI "game"       (homedir++"/Games")           $ spawnShell
            ,TI "music"      (homedir++"/Music")           $ spawn "spotify"
