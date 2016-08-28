@@ -225,7 +225,7 @@ parseSearch s = (engine,query)
 writerPrompt :: X ()
 writerPrompt = inputPromptWithCompl myXPConfig "writer" (mkComplFunFromList xs) ?+ f
   where f x = if x `elem` xs then spawn x else return ()
-        xs = ["focuswriter","turtl"]
+        xs = ["focuswriter","libreoffice"]
 
 spotifyCommand :: String -> X ()
 spotifyCommand str = spawn $ "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player."++str
