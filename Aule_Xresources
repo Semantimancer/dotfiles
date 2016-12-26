@@ -1,0 +1,85 @@
+! Xft settings
+
+Xft.dpi:        96
+Xft.antialias:  true
+Xft.rgba:       rgb
+Xft.hinting:    full
+Xft.hintstyle:  hintslight
+
+URxvt*.urgentOnBell: true
+URxvt*.visualBell: false
+
+URxvt*.scrollBar: false
+
+URxvt*.font: xft:hack:Regular:size=8
+URxvt*.letterSpace: -1
+
+URxvt*.cursorBlink: true
+URxvt*.cursorUnderline: true
+
+! --- ~/.Xresources ------------------------------------------------------------
+! ------------------------------------------------------------------------------
+! --- generated with 4bit Terminal Color Scheme Designer -----------------------
+! ------------------------------------------------------------------------------
+! --- http://ciembor.github.com/4bit -------------------------------------------
+! ------------------------------------------------------------------------------
+
+! --- special colors ---
+
+*background: #1e1c15
+*foreground: #e9e5e2
+
+! --- standard colors ---
+
+! black
+*color0: #333126
+
+! bright_black
+*color8: #67655a
+
+! red
+*color1: #b66950
+
+! bright_red
+*color9: #dac0b0
+
+! green
+*color2: #5db45e
+
+! bright_green
+*color10: #bdd8b5
+
+! yellow
+*color3: #a7b450
+
+! bright_yellow
+*color11: #d5d8b0
+
+! blue
+*color4: #6b5ba9
+
+! bright_blue
+*color12: #c2bbcd
+
+! magenta
+*color5: #b65b9a
+
+! bright_magenta
+*color13: #dabbc8
+
+! cyan
+*color6: #5da5a9
+
+! bright_cyan
+*color14: #bdd3cd
+
+! white
+*color7: #bfbdb2
+
+! bright_white
+*color15: #e0ded3
+
+
+! ------------------------------------------------------------------------------
+! --- end of terminal colors section -------------------------------------------
+! ------------------------------------------------------------------------------
