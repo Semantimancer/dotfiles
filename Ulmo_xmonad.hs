@@ -64,7 +64,7 @@ data TopicItem = TI { topicName :: String
 
 myTopics :: [TopicItem]
 myTopics = [TI "dashboard"  homedir                       $ spawn' "Ranger" "ranger"
-           ,TI "web"        homedir                       $ spawn "vivaldi-snapshot"
+           ,TI "web"        homedir                       $ spawn "vivaldi-stable"
            ,TI "vim"        homedir                       $ spawn' "ViM" "vim"
            ,TI "chat"       homedir                       $ spawn "skype"
            ,TI "writing"    (homedir++"/Documents")       $ writerPrompt
@@ -195,7 +195,7 @@ searchPrompt c = inputPromptWithCompl c "search" (mkComplFunFromList ss) ?+ sear
              ,"hoogle","imdb","archwiki","aur","gmail","sareth"]
 
 search' :: String -> X ()
-search' s = search "vivaldi-snapshot" (use engine) query
+search' s = search "vivaldi-stable" (use engine) query
   where (engine,query) = parseSearch s
 
 parseSearch :: String -> (SearchEngine,String)
