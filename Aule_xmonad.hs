@@ -37,7 +37,7 @@ import qualified Data.Map        as M
 
 notes = "/home/ben/Notes.txt"
 
-startupCommands = ["skype","rawdog -Wuw"]
+startupCommands = ["skype"]
 
 --
 --
@@ -62,7 +62,7 @@ data TopicItem = TI { topicName :: String
 
 myTopics :: [TopicItem]
 myTopics = [TI "dashboard"  homedir                       $ spawn' "Ranger" "ranger"
-           ,TI "web"        homedir                       $ spawn "firefox"
+           ,TI "web"        homedir                       $ spawn "vivaldi-stable"
            ,TI "vim"        homedir                       $ spawn' "ViM" "vim"
            ,TI "chat"       homedir                       $ spawn "skype"
            ,TI "writing"    (homedir++"/Documents")       $ writerPrompt
@@ -193,7 +193,7 @@ searchPrompt c = inputPromptWithCompl c "search" (mkComplFunFromList ss) ?+ sear
              ,"hoogle","imdb","archwiki","aur","gmail","sareth"]
 
 search' :: String -> X ()
-search' s = search "firefox" (use engine) query
+search' s = search "vivaldi-stable" (use engine) query
   where (engine,query) = parseSearch s
 
 parseSearch :: String -> (SearchEngine,String)
@@ -313,6 +313,10 @@ keyboard conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       , ((0, xK_space), sendMessage NextLayout >> visual)
       , ((0, xK_s), (withFocused $ windows . W.sink) >> visual)
       , ((0, xK_z), (sendMessage $ Toggle FULL) >> visual)
+
+      -- This creates a "hole" through which the desktop can always be seen.
+      -- Just a cool visual trick, mostly I use it for resizing video windows.
+      , ((0, xK_b), spawn "urxvt -T DesktopHole -e tail -f /dev/null")
     
       --  control+{h,j,k,l controls sizing of tiles
       , ((controlMask, xK_l), sendMessage (MoveSplit R) >> visual)
@@ -462,6 +466,7 @@ myLogHook = fadeWindowsLogHook fadeHook
   where fadeHook :: FadeHook
         fadeHook = composeAll [ opaque 
                               , isUnfocused             --> transparency 0.3
+                              , title =? "DesktopHole"  --> transparency 1.0
                               , isFloating              --> opaque
                               , className =? "chromium" --> opaque
                               , className =? "MPlayer"  --> opaque
