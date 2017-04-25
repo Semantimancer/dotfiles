@@ -37,7 +37,7 @@ import qualified Data.Map        as M
 
 notes = "/home/ben/Notes.txt"
 
-startupCommands = ["skypeforlinux"]
+startupCommands = ["skypeforlinux","tiny-care-terminal"]
 
 --
 --
@@ -61,7 +61,7 @@ data TopicItem = TI { topicName :: String
                     }
 
 myTopics :: [TopicItem]
-myTopics = [TI "dashboard"  homedir                       $ spawn' "Ranger" "ranger"
+myTopics = [TI "dashboard"  homedir                       $ spawn' "TinyCareTerminal" "tiny-care-terminal"
            ,TI "web"        homedir                       $ spawn "vivaldi-stable"
            ,TI "vim"        homedir                       $ spawn' "ViM" "vim"
            ,TI "chat"       homedir                       $ spawn "skypeforlinux"
@@ -436,7 +436,7 @@ myManageHook = composeAll
   , className =? "Gimp"                               --> doShift "gimp"
   , className =? "feh"                                --> doFloat
   , className =? "Firefox" <&&> resource =? "Dialog"  --> doFloat
-  , className =? "Skype"                              --> doShift "chat"
+  , className =? "skypeforlinux"                      --> doShift "chat"
   , className =? "Mumble"                             --> doShift "chat"
   , className =? "Steam"                              --> doShift "steam"
   , className =? "Spotify"                            --> doShift "music"
@@ -445,6 +445,7 @@ myManageHook = composeAll
   , title =? "Ranger"                                 --> doShift "dashboard"
   , title =? "News"                                   --> doShift "reference"
   , title =? "ScratchPad"                             --> doSideFloat CE
+  , title =? "TinyCareTerminal"                       --> doShift "dashboard"
   , isFullscreen                                      --> doFullFloat
   , isDialog                                          --> doFloat
   ]

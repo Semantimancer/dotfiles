@@ -7,6 +7,13 @@ export LANG=C
 export PATH=$HOME/Computer/scripts:$HOME/.cabal/bin:$PATH
 PATH="$(ruby -e 'puts Gem.user_dir')/bin:$PATH"
 
+export TTC_BOTS='tinycarebot,selfcare_bot,magicrealismbot'
+export TTC_REPOS='~/Computer/dotfiles,~/Computer/Haskell/Homunculus'
+export TTC_WEATHER='Bloomington, IN'
+export TTC_CELSIUS=false
+export TTC_APIKEYS=false
+export TTC_UPDATE_INTERVAL=10
+
 # To change this:
 #  * Modify ~/.dir_colors to desired values
 #  * Replace text below with output of "dircolors ~/.dir_colors"
