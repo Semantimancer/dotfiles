@@ -37,7 +37,7 @@ import qualified Data.Map        as M
 
 notes = "/home/ben/Notes.txt"
 
-startupCommands = ["skype"]
+startupCommands = ["skypeforlinux"]
 
 --
 --
@@ -64,7 +64,7 @@ myTopics :: [TopicItem]
 myTopics = [TI "dashboard"  homedir                       $ spawn' "Ranger" "ranger"
            ,TI "web"        homedir                       $ spawn "vivaldi-stable"
            ,TI "vim"        homedir                       $ spawn' "ViM" "vim"
-           ,TI "chat"       homedir                       $ spawn "skype"
+           ,TI "chat"       homedir                       $ spawn "skypeforlinux"
            ,TI "writing"    (homedir++"/Documents")       $ writerPrompt
            ,TI "gimp"       (homedir++"/Pictures")        $ spawn "gimp"
            ,TI "work"       homedir                       $ spawnShell
