@@ -37,7 +37,7 @@ import qualified Data.Map        as M
 
 notes = "/home/ben/Notes.txt"
 
-startupCommands = ["skypeforlinux","tiny-care-terminal","spotify"]
+startupCommands = ["skypeforlinux","urxvt -T TinyCareTerminal -e tiny-care-terminal","spotify"]
 
 --
 --
