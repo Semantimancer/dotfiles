@@ -7,8 +7,9 @@ export LANG=C
 export PATH=$HOME/Computer/scripts:$HOME/.cabal/bin:$PATH
 PATH="$(ruby -e 'puts Gem.user_dir')/bin:$PATH"
 
-export TTC_BOTS='tinycarebot,selfcare_bot,magicrealismbot'
-export TTC_REPOS='~/Computer/dotfiles,~/Computer/Haskell/Homunculus'
+# Tiny Care Terminal
+export TTC_BOTS='selfcare_bot,magicrealismbot,youarecarrying'
+export TTC_REPOS='~/Computer/dotfiles,~/Computer/Haskell/Homunculus,~/Computer/Sarenteth'
 export TTC_WEATHER='Bloomington, IN'
 export TTC_CELSIUS=false
 export TTC_APIKEYS=false
