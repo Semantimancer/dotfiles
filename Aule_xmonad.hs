@@ -35,8 +35,6 @@ import XMonad.Util.Run (runProcessWithInput)
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
 
-notes = "/home/ben/Notes.txt"
-
 startupCommands = ["skypeforlinux","urxvt -T TinyCareTerminal -e tiny-care-terminal","spotify"]
 
 --
@@ -68,12 +66,12 @@ myTopics = [TI "dashboard"  homedir                       $ spawn' "TinyCareTerm
            ,TI "writing"    (homedir++"/Documents")       $ writerPrompt
            ,TI "gimp"       (homedir++"/Pictures")        $ spawn "gimp"
            ,TI "work"       homedir                       $ spawnShell
-           ,TI "reference"  homedir                       $ spawn "wmail"
+           ,TI "reference"  homedir                       $ spawnShell
            ,TI "compile"    (homedir++"/Computer")        $ spawnShell
            ,TI "game"       (homedir++"/Games")           $ spawnShell
            ,TI "music"      (homedir++"/Music")           $ spawn "spotify"
            ,TI "movie"      (homedir++"/Videos")          $ spawnShell
-           ,TI "view"       (homedir++"/Pictures")        $ spawnShell
+           ,TI "view"       (homedir++"/Pictures")        $ spawn' "View" "ranger"
            ,TI "upload"     (homedir++"/Computer/Web")    $ spawn "filezilla"
            ,TI "pdf"        (homedir++"/Documents")       $ spawnShell
            ,TI "steam"      (homedir++"/home/ben/Games")  $ spawn "steam.sh"
@@ -159,11 +157,6 @@ myXPConfig = defaultXPConfig
   , font = "xft:Hack:Regular:size=8", bgColor = "#222222"
   , fgColor = "#87afdf", bgHLight = "#87afdf"
   }
-
-makeNote :: X ()
-makeNote =  appendFilePrompt myXPConfig notes
-         >> spawn "echo \"%\" >> Notes.txt"
-         >> spawn "sudo strfile /usr/share/fortune/myNotes"
 
 calcPrompt :: XPConfig -> String -> X ()
 calcPrompt c ans = 
@@ -275,7 +268,6 @@ keyboard conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     commandMode =
       --Command mode is mainly going to be used for prompts...
       [ ((0, xK_o), runOrRaisePrompt myXPConfig)
-      , ((0, xK_n), makeNote)
       , ((0, xK_c), calcPrompt myXPConfig "qalc")
       , ((0, xK_i), infoPrompt myXPConfig "info")
       , ((0, xK_k), killPrompt myXPConfig)
@@ -409,7 +401,7 @@ layout = showWName $ mkToggle (single FULL) $ perWS $ smartBorders $ emptyBSP
         chat =    onWorkspace "chat"    $ reflectHoriz Circle
         steam =   onWorkspace "steam"   $ one
         compile = onWorkspace "compile" $ one
-        music =   onWorkspace "media"   $ one ||| reflectHoriz one
+        music =   onWorkspace "music"   $ one ||| reflectHoriz one
         gimp =    onWorkspace "gimp"    $   
                     withIM (0.15) (Role "gimp-toolbox") $ reflectHoriz $
                       withIM (0.20) (Role "gimp-dock") (emptyBSP ||| Full)
@@ -440,9 +432,9 @@ myManageHook = composeAll
   , className =? "Mumble"                             --> doShift "chat"
   , className =? "Steam"                              --> doShift "steam"
   , className =? "Spotify"                            --> doShift "music"
-  , className =? "stalonetry"                         --> doSideFloat NC
   , title =? "ViM"                                    --> doShift "vim"
   , title =? "Ranger"                                 --> doShift "dashboard"
+  , title =? "View"                                   --> doShift "view"
   , title =? "News"                                   --> doShift "reference"
   , title =? "ScratchPad"                             --> doSideFloat CE
   , title =? "TinyCareTerminal"                       --> doShift "dashboard"
