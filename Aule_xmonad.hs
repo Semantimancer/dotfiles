@@ -461,7 +461,7 @@ myLogHook = fadeWindowsLogHook fadeHook
                               , isUnfocused             --> transparency 0.3
                               , title =? "DesktopHole"  --> transparency 1.0
                               , isFloating              --> opaque
-                              , className =? "chromium" --> opaque
+                              , className =? "Chromium" --> opaque
                               , className =? "MPlayer"  --> opaque
                               , className =? "mpv"      --> opaque
                               , iconName =? gimpName    --> opaque
