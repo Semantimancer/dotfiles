@@ -35,7 +35,7 @@ import XMonad.Util.Run (runProcessWithInput)
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
 
-startupCommands = ["skypeforlinux","urxvt -T TinyCareTerminal -e tiny-care-terminal","spotify"]
+startupCommands = ["skypeforlinux","termite -t TinyCareTerminal -e tiny-care-terminal","spotify"]
 
 --
 --
@@ -77,7 +77,7 @@ myTopics = [TI "dashboard"  homedir                       $ spawn' "TinyCareTerm
            ,TI "steam"      (homedir++"/home/ben/Games")  $ spawn "steam.sh"
            ]
   where homedir = "/home/ben"
-        spawn' x y = spawn $ "urxvt -T "++x++" -e "++y
+        spawn' x y = spawn $ "termite -t "++x++" -e "++y
 
 myTopicConfig :: TopicConfig
 myTopicConfig = defaultTopicConfig
@@ -92,7 +92,7 @@ spawnShell :: X ()
 spawnShell = currentTopicDir myTopicConfig >>= spawnShellIn
 
 spawnShellIn :: Dir -> X ()
-spawnShellIn dir = spawn $ "urxvt -cd \""++dir++"\""
+spawnShellIn dir = spawn $ "termite -d \""++dir++"\""
 
 goto :: WorkspaceId -> X ()
 goto = switchTopic myTopicConfig
@@ -276,9 +276,9 @@ keyboard conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       -- ...but occasionally I'll use it to spawn something else
       , ((0, xK_Return), spawn $ XMonad.terminal conf)
       , ((0, xK_x), spawn "xmonad --recompile; xmonad --restart")
-      , ((0, xK_e), spawn "urxvt -T ViM -e vim")
-      , ((0, xK_t), spawn "urxvt -T ScratchPad")
-      , ((0, xK_r), spawn "urxvt -T Ranger -e ranger")
+      , ((0, xK_e), spawn "termite -t ViM -e vim")
+      , ((0, xK_t), spawn "termite -t ScratchPad")
+      , ((0, xK_r), spawn "termite -t Ranger -e ranger")
 
       , ((0, xK_m), submap . M.fromList $ audioMode)
       , ((0, xK_v), submap . M.fromList $ visualMode)
@@ -308,7 +308,7 @@ keyboard conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
       -- This creates a "hole" through which the desktop can always be seen.
       -- Just a cool visual trick, mostly I use it for resizing video windows.
-      , ((0, xK_b), spawn "urxvt -T DesktopHole -e tail -f /dev/null")
+      , ((0, xK_b), spawn "termite -t DesktopHole -e tail -f /dev/null")
     
       --  control+{h,j,k,l controls sizing of tiles
       , ((controlMask, xK_l), sendMessage (MoveSplit R) >> visual)
@@ -471,7 +471,7 @@ myLogHook = fadeWindowsLogHook fadeHook
 
 main :: IO ()
 main = xmonad $ defaultConfig
-  { terminal            = "urxvt"
+  { terminal            = "termite"
   , normalBorderColor   = "#39474A"
   , focusedBorderColor  = "#567A6E"
   , focusFollowsMouse   = False
