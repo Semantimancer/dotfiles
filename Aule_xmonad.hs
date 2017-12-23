@@ -35,7 +35,7 @@ import XMonad.Util.Run (runProcessWithInput)
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
 
-startupCommands = ["skypeforlinux","termite -t TinyCareTerminal -e tiny-care-terminal","spotify"]
+startupCommands = ["skypeforlinux","termite -t Agathion -e agathion","spotify"]
 
 --
 --
@@ -59,7 +59,7 @@ data TopicItem = TI { topicName :: String
                     }
 
 myTopics :: [TopicItem]
-myTopics = [TI "dashboard"  homedir                       $ spawn' "TinyCareTerminal" "tiny-care-terminal"
+myTopics = [TI "dashboard"  homedir                       $ spawn' "Agathion" "agathion"
            ,TI "web"        homedir                       $ spawn "vivaldi-stable"
            ,TI "vim"        homedir                       $ spawn' "ViM" "vim"
            ,TI "chat"       homedir                       $ spawn "skypeforlinux"
@@ -437,7 +437,7 @@ myManageHook = composeAll
   , title =? "View"                                   --> doShift "view"
   , title =? "News"                                   --> doShift "reference"
   , title =? "ScratchPad"                             --> doSideFloat CE
-  , title =? "TinyCareTerminal"                       --> doShift "dashboard"
+  , title =? "Agathion"                               --> doShift "dashboard"
   , isFullscreen                                      --> doFullFloat
   , isDialog                                          --> doFloat
   ]
