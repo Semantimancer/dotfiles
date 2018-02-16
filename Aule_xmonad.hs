@@ -35,7 +35,7 @@ import XMonad.Util.Run (runProcessWithInput)
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
 
-startupCommands = ["skypeforlinux","termite -t Agathion -e agathion","spotify"]
+startupCommands = ["skypeforlinux","termite -t Agathion -e agathion","gpmdp"]
 
 --
 --
@@ -69,7 +69,7 @@ myTopics = [TI "dashboard"  homedir                       $ spawn' "Agathion" "a
            ,TI "reference"  homedir                       $ spawnShell
            ,TI "compile"    (homedir++"/Computer")        $ spawnShell
            ,TI "game"       (homedir++"/Games")           $ spawnShell
-           ,TI "music"      (homedir++"/Music")           $ spawn "spotify"
+           ,TI "music"      (homedir++"/Music")           $ spawn "gpmdp"
            ,TI "movie"      (homedir++"/Videos")          $ spawnShell
            ,TI "view"       (homedir++"/Pictures")        $ spawn' "View" "ranger"
            ,TI "upload"     (homedir++"/Computer/Web")    $ spawn "filezilla"
@@ -220,9 +220,6 @@ writerPrompt = inputPromptWithCompl myXPConfig "writer" (mkComplFunFromList xs) 
   where f x = if x `elem` xs then spawn x else return ()
         xs = ["focuswriter","libreoffice"]
 
-spotifyCommand :: String -> X ()
-spotifyCommand str = spawn $ "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player."++str
-
 wallpaperCommand :: String -> X ()
 wallpaperCommand str = case str of
   "toggle"  -> spawn ("/home/ben/.wallpaper/toggle.sh")
@@ -333,7 +330,7 @@ keyboard conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       , ((0, xK_m), submap . M.fromList $ audioMode)
       ] ++ navKeys
     visual = submap . M.fromList $ visualMode
-    --Audio Mode deals with volume and spotify
+    --Audio Mode deals with volume
     audioMode = 
       --Volume controls first
       [ ((0, xK_m), spawn "pamixer -t" >> audio)
@@ -355,11 +352,6 @@ keyboard conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       , ((0, xK_8), spawn "pamixer --set-volume 80" >> audio)
       , ((0, xK_9), spawn "pamixer --set-volume 90" >> audio)
       , ((0, xK_0), spawn "pamixer --set-volume 100" >> audio)
-
-      --Now for Spotify
-      , ((0, xK_l), spotifyCommand "Next" >> audio)
-      , ((0, xK_h), spotifyCommand "Previous" >> audio)
-      , ((0, xK_space), spotifyCommand "PlayPause" >> audio)
 
       , ((0, xK_semicolon), submap . M.fromList $ commandMode)
       , ((0, xK_v), submap . M.fromList $ visualMode)
@@ -431,7 +423,7 @@ myManageHook = composeAll
   , className =? "skypeforlinux"                      --> doShift "chat"
   , className =? "Mumble"                             --> doShift "chat"
   , className =? "Steam"                              --> doShift "steam"
-  , className =? "Spotify"                            --> doShift "music"
+  , className =? "google play music desktop player"   --> doShift "music"
   , title =? "ViM"                                    --> doShift "vim"
   , title =? "Ranger"                                 --> doShift "dashboard"
   , title =? "View"                                   --> doShift "view"
