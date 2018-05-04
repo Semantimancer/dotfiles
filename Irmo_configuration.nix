@@ -5,102 +5,52 @@
 { config, pkgs, ... }:
 
 {
+  # Boot
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
     ];
-
-  # Use the GRUB 2 boot loader.
-  # boot.loader.grub.enable = true;
-  # boot.loader.grub.version = 2;
-  # boot.loader.grub.efiSupport = true;
-  # boot.loader.grub.efiInstallAsRemovable = true;
-  # boot.loader.efi.efiSysMountPoint = "/boot/efi";
-  # Define on which hard drive you want to install Grub.
-  # boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
-
   boot.loader.systemd-boot.enable = true;
+  networking.hostName = "Irmo";
+  services.nixosManual.showManual = true;
 
-  networking.hostName = "Irmo"; # Define your hostname.
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-
-  # Select internationalisation properties.
+  # Internationalization
   i18n = {
     consoleFont = "Lat2-Terminus16";
     consoleKeyMap = "us";
     defaultLocale = "en_US.UTF-8";
   };
-
-  # Set your time zone.
   time.timeZone = "America/New_York";
 
+  # Packages
   nixpkgs.config.allowUnfree = true;
-
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
   environment.systemPackages = with pkgs; [
+    # Basics
+    lxterminal termite
+    ranger wget feh vim
 
-    # basics
-    lxterminal
-    termite
-    ranger
-    wget 
-    feh
-    vim
+    # Writing
+    focuswriter libreoffice
 
-    # writing
-    focuswriter
-
-    # coding
+    # Coding
     git
-    gcc
-    ghc
+    gcc ghc
 
-    # graphics
+    # Graphics 
     x11
 
-    # web
-    chromium
-    vivaldi
+    # Web
+    chromium vivaldi
 
-    # chat
-    mumble_git
-    skypeforlinux
+    # Chat
+    mumble_git skypeforlinux
+    irssi
 
-    # games
+    # Games
     steam
   ];
 
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  programs.bash.enableCompletion = true;
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = { enable = true; enableSSHSupport = true; };
-
-  # List services that you want to enable:
-
-  # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
-
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
-
-  # Enable CUPS to print documents.
-  # services.printing.enable = true;
-
-  # Enable sound.
-  sound.enable = true;
-  hardware.pulseaudio.enable = true;
-  hardware.pulseaudio.support32Bit = true;
-
-  # Enable the X11 windowing system.
-  # services.xserver.enable = true;
-  # services.xserver.layout = "us";
-  # services.xserver.xkbOptions = "eurosign:e";
-
+  # Graphics
   services.xserver.enable = true;
   services.xserver.autorun = true;
 
@@ -128,37 +78,19 @@
     fadeDelta = 4;
   };
 
-#  services.xserver.videoDrivers = [ "nvidiaBeta" ];
+  # services.xserver.videoDrivers = [ "nvidia" ]; Can't seem to get this to work.
   hardware.opengl.driSupport32Bit = true;
 
-  #services.xserver = {
-  #  enable = true;
-  #  displayManager.slim.enable = false;
-  #  displayManager.lightdm.enable = true;
-  #  windowManager.xmonad = {
-  #    enable = true;
-  #    enableContribAndExtras = true;
-  #    extraPackages = haskellPackages: [
-  #      haskellPackages.xmonad-contrib
-  #      haskellPackages.xmonad-extras
-  #      haskellPackages.xmonad
-  #    ];
-  #  };
-  #  windowManager.default = "xmonad";
-#
-  #  layout = "us";
-  #};
+  # Sound
+  sound.enable = true;
+  hardware.pulseaudio.enable = true;
+  hardware.pulseaudio.support32Bit = true;
 
-  services.nixosManual.showManual = true;
+  # Program Specifics
 
-  # Enable touchpad support.
-  # services.xserver.libinput.enable = true;
+  programs.bash.enableCompletion = true;
 
-  # Enable the KDE Desktop Environment.
-  # services.xserver.displayManager.sddm.enable = true;
-  # services.xserver.desktopManager.plasma5.enable = true;
-
-  # Define a user account. Don't forget to set a password with ‘passwd’.
+  # Users
   users.extraUsers.ben = {
     createHome = true;
     home = "/home/ben";
