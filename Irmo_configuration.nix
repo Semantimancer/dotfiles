@@ -31,6 +31,7 @@
 
     # Writing
     focuswriter libreoffice
+    corefonts
 
     # Coding
     git
@@ -73,9 +74,8 @@
   services.compton = {
     enable = true;
     fade = true;
+    fadeDelta = 3;
     inactiveOpacity = "0.8";
-    shadow = true;
-    fadeDelta = 4;
   };
 
   # services.xserver.videoDrivers = [ "nvidia" ]; Can't seem to get this to work.
