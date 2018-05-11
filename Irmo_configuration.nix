@@ -39,6 +39,7 @@
 
     # Graphics 
     x11
+    gimp
 
     # Web
     chromium vivaldi
@@ -70,13 +71,6 @@
   };
 
   services.xserver.xkbOptions = "caps:swapescape";
-
-  services.compton = {
-    enable = true;
-    fade = true;
-    fadeDelta = 3;
-    inactiveOpacity = "0.8";
-  };
 
   # services.xserver.videoDrivers = [ "nvidia" ]; Can't seem to get this to work.
   hardware.opengl.driSupport32Bit = true;
