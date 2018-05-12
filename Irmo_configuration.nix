@@ -50,6 +50,9 @@
 
     # Games
     steam
+
+    # Music
+    google-play-music-desktop-player
   ];
 
   # Graphics
