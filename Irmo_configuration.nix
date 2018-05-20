@@ -2,14 +2,39 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   # Boot
   imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
+    [ # Include the results of the hardware scan. 
+      # I'm choosing to ignore the hardware scan because I've seen it reset and lose my /boot directory twice now.
+      # Instead, I will manually migrate everything in hardware-configuration.nix into this file and mark it as such.
+      # ./hardware-configuration.nix
+      <nixpkgs/nixos/modules/installer/scan/not-detected.nix> # From hardware-configuration.nix
     ];
+
+  # hardware-configuration.nix
+
+  boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "usbhid" "sd_mod" "sr_mod" ];
+  boot.kernelModules = [ "kvm-amd" ];
+  boot.extraModulePackages = [ ];
+
+  fileSystems."/" =
+    { device = "/dev/disk/by-uuid/d844d67e-8350-4824-8a77-308495384de6";
+      fsType = "ext4";
+    };
+
+  fileSystems."/boot" =
+    { device = "/dev/disk/by-uuid/FBA8-92AA";
+      fsType = "vfat";
+    };
+
+  swapDevices =
+    [ { device = "/dev/disk/by-uuid/0746fc53-b5ec-4d2c-a7d6-a18357a6c53e"; }
+    ];
+
+  nix.maxJobs = lib.mkDefault 12;
   boot.loader.systemd-boot.enable = true;
   networking.hostName = "Irmo";
   services.nixosManual.showManual = true;
@@ -73,8 +98,6 @@
     enableContribAndExtras = true;
   };
 
-  services.xserver.xkbOptions = "caps:swapescape";
-
   # services.xserver.videoDrivers = [ "nvidia" ]; Can't seem to get this to work.
   hardware.opengl.driSupport32Bit = true;
 
@@ -83,7 +106,9 @@
   hardware.pulseaudio.enable = true;
   hardware.pulseaudio.support32Bit = true;
 
-  # Program Specifics
+  # Other
+
+  services.xserver.xkbOptions = "caps:swapescape";
 
   programs.bash.enableCompletion = true;
 
