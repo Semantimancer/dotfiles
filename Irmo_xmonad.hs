@@ -72,7 +72,7 @@ myTopics = [TI "dashboard"  homedir                       $ spawn' "Agathion" "/
            ,TI "reference"  homedir                       $ spawnShell
            ,TI "compile"    (homedir++"/Computer")        $ spawnShell
            ,TI "game"       (homedir++"/Games")           $ spawnShell
-           ,TI "music"      (homedir++"/Music")           $ spawn "gpmdp"
+           ,TI "music"      (homedir++"/Music")           $ spawn "google-play-music-desktop-player"
            ,TI "movie"      (homedir++"/Videos")          $ spawnShell
            ,TI "view"       (homedir++"/Pictures")        $ spawn' "View" "ranger"
            ,TI "upload"     (homedir++"/Computer/Web")    $ spawn "filezilla"
@@ -403,7 +403,6 @@ myManageHook = composeAll
   , className =? "mpv"                                --> doShift "movie"
   , className =? "Gimp"                               --> doShift "gimp"
   , className =? "feh"                                --> doFloat
-  , className =? "Firefox" <&&> resource =? "Dialog"  --> doFloat
   , className =? "skypeforlinux"                      --> doShift "chat"
   , className =? "Mumble"                             --> doShift "chat"
   , className =? "Steam"                              --> doShift "steam"
@@ -411,38 +410,12 @@ myManageHook = composeAll
   , title =? "ViM"                                    --> doShift "vim"
   , title =? "Ranger"                                 --> doShift "dashboard"
   , title =? "View"                                   --> doShift "view"
-  , title =? "News"                                   --> doShift "reference"
   , title =? "ScratchPad"                             --> doSideFloat CE
   , title =? "Agathion"                               --> doShift "dashboard"
   , isFullscreen                                      --> doFullFloat
   , isDialog                                          --> doFloat
   ]
   where unfloat = ask >>= doF . W.sink
-
---
---
---  Log Hook
---  This is used to handle the FadeWindows hook. The fadeHook works similarly 
---  to other hooks, but because it hits all windows, it has to account for all 
---  possibilities. The first line ("opaque") is the default; the isUnfocused 
---  line is the thing I want it to handle (most unfocused windows are 
---  transparent). Everything after that line are exceptions to the rule; they 
---  will reset to opaque.
---
---
-
-myLogHook = fadeWindowsLogHook fadeHook
-  where fadeHook :: FadeHook
-        fadeHook = composeAll [ opaque 
-                              , isUnfocused             --> transparency 0.3
-                              , isFloating              --> opaque
-                              , className =? "Chromium" --> opaque
-                              , className =? "MPlayer"  --> opaque
-                              , className =? "mpv"      --> opaque
-                              , iconName =? gimpName    --> opaque
-                              ]
-        gimpName = "GNU Image Manipulation Program"
-        iconName = stringProperty "WM_ICON_NAME"
 
 main :: IO ()
 main = xmonad $ defaultConfig
@@ -459,5 +432,4 @@ main = xmonad $ defaultConfig
   , layoutHook          = layout
   , manageHook          = myManageHook
   , startupHook         = mapM_ spawn startupCommands
-  , logHook             = myLogHook
   }

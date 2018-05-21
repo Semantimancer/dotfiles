@@ -52,7 +52,8 @@
   environment.systemPackages = with pkgs; [
     # Basics
     lxterminal termite
-    ranger wget feh vim
+    ranger wget feh mupdf vim
+    qalculate-gtk libqalculate
 
     # Writing
     focuswriter libreoffice
@@ -64,7 +65,7 @@
 
     # Graphics 
     x11
-    gimp
+    gimp scrot
 
     # Web
     chromium vivaldi

@@ -1,0 +1,32 @@
+syntax enable
+set autoread
+set nocompatible
+set backspace=indent,eol,start
+
+set nu
+set rnu
+
+set expandtab
+set tabstop=2
+set shiftwidth=2
+set autoindent
+set nojoinspaces
+set showcmd
+set incsearch
+set ignorecase
+set smartcase
+set confirm
+    
+set wrap
+set linebreak
+set nolist
+set textwidth=0
+set wrapmargin=0
+    
+map j gj
+map k gk
+
+set pastetoggle=<F2>
+
+set wildmode=longest,full
+set wildmenu
